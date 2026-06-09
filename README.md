@@ -1,23 +1,83 @@
 # Dog Breed Classification
 
-A deep learning project that classifies dog breeds from images using a Convolutional Neural Network (CNN). Built as a capstone project for The Knowledge House Data Science Fellowship — Phase 3.
+A deep learning project that classifies dog breeds from images using a CNN. Built as a capstone project for The Knowledge House Data Science Fellowship — Phase 3.
 
 ---
 
 ## Project Overview
 
-We are training a convolutional neural network to accurately identify dog breeds from photographs. The ultimate goal of this project is to deploy an interactive web demo where a user can upload a photo of a dog and instantly receive the predicted breed.
+We're training a convolutional neural network to identify dog breeds from photos. The goal is an interactive demo where a user uploads a photo of a dog and the model returns the predicted breed.
 
-**Key Engineering & Research Questions:**
-*   **Visual Similarity:** How effectively does the model differentiate between visually similar breeds?
-*   **Class Imbalance:** How does class imbalance across different breeds affect performance, and what data augmentation or loss-function strategies best address it?
-*   **Deployment:** How can we build and optimize a lightweight interactive demo for user-facing inference?
+**Key questions we're answering:**
+- How does the model handle visually similar breeds?
+- How does class imbalance across breeds affect performance and what strategies can address it?
+- How can we build an interactive demo where a user uploads a photo and gets a predicted breed back?
 
 ---
 
 ## Dataset
 
-**Dog Breed Image Dataset** — Available on [Kaggle](https://www.kaggle.com/datasets/khushikhushikhushi/dog-breed-image-dataset)
+**70 Dog Breeds Image Dataset** — [Kaggle](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set)
+
+- 70 breeds, ~7,946 images
+- Pre-split into train, valid, and test folders
+- Images resized to 224x224
+
+---
+
+## Project Structure
+
+```
+dog-breed-classification/
+├── notebooks/
+│   ├── 01_eda.ipynb              # Exploratory data analysis
+│   ├── 02_preprocessing.ipynb   # Cleaning, resizing, augmentation
+│   └── 03_modeling.ipynb        # CNN training and evaluation
+├── data/                        # Raw and processed data (gitignored)
+├── docs/
+│   └── report.md                # Project report
+└── README.md
+```
+
+---
+
+## Sprint Plan
+
+| Sprint | Dates | Focus |
+|--------|-------|-------|
+| Sprint 1 | 6/3 – 6/11 | Project foundation and EDA |
+| Sprint 2 | 6/11 – 6/25 | Storage, preprocessing, augmentation |
+| Sprint 3 | 6/25 – 7/9 | CNN model training and evaluation |
+| Sprint 4 | 7/9 – 7/16 | Demo app, final cleanup, presentation |
+
+---
+
+## Sprint 1 Deliverables
+
+- [ ] GitHub repo created, all members added as collaborators
+- [ ] Each member has their own branch
+- [ ] Kanban board set up with tasks assigned
+- [ ] Background research — papers and blog posts on dog breed classification / CNNs
+- [ ] Problem definition — questions, features, definition of done
+- [ ] Value statement — why this matters
+- [ ] Limitations — expected challenges
+- [ ] EDA notebook (`01_eda.ipynb`) merged to main covering:
+  - Class distribution bar chart
+  - Sample image grid per breed
+  - Image dimension distribution
+  - Class imbalance check
+  - Written summary + preprocessing plan for Sprint 2
+
+---
+
+## Team
+
+| Name | Role |
+|------|------|
+| Dre | Group Lead |
+| Cameron | TBD |
+| Manuela | TBD |
+| Ozor | TBD |
 
 ---
 
@@ -25,26 +85,11 @@ We are training a convolutional neural network to accurately identify dog breeds
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat&logo=jupyter&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)
-
-> *Note: Final deep learning framework (TensorFlow/PyTorch) and deployment tool (Streamlit/Gradio) to be finalized during Sprint 2.*
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)
 
 ---
 
-## Project Structure
+## Acknowledgements
 
-```text
-dog-breed-classification/
-├── notebooks/
-│   ├── 01_eda.ipynb              # Exploratory data analysis & class distribution
-│   ├── 02_preprocessing.ipynb   # Image cleaning, resizing, and augmentation pipelines
-│   └── 03_modeling.ipynb        # CNN architecture training and evaluation
-├── data/                        # Raw and processed datasets (gitignored)
-├── models/                      # Saved weights, model architectures, and pickles (gitignored)
-├── docs/
-│   └── report.md                # Final project report and findings
-├── requirements.txt             # Environment dependencies
-└── README.md
+Fellowship: The Knowledge House — Data Science Phase 3

@@ -75,9 +75,9 @@ dog-breed-classification/
 | Name | Role |
 |------|------|
 | Dre | Group Lead |
-| Cameron | TBD |
-| Manuela | TBD |
-| Ozor | TBD |
+| Cameron | sample image grid |
+| Manuela | background research on CNNs  |
+| Ozor | checking for any corrupted or missing files |
 
 ---
 

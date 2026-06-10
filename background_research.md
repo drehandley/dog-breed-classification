@@ -9,14 +9,12 @@
 **Link:** https://www.kdnuggets.com/2022/05/image-classification-convolutional-neural-networks-cnns.html
 
 ### What I Learned
-CNNs take images as numerical data (pixels) and use the convolution operation to reduce the 
-representation down to only the features that actually matter for classification things like 
-edges, shapes, and textures. At the end, a softmax activation function converts the network's 
-output into class probabilities, one per category.
 
-This was helpful for understanding why CNNs are used for dog breeds the model doesn't need 
-to be told what a floppy ear or a spotted coat looks like, it figures those distinguishing 
-features out on its own during training.
+A CNN works by looking at an image as a grid of numbers, basically just pixel values, and then scanning it in small sections to pick out patterns. It does this through something called convolution, where it uses filters to find things like edges, shapes, and textures in the image. Each filter is looking for something different, and the model stacks all of these together to build up an understanding of what is in the image.
+
+After all that scanning and filtering, the image gets compressed down and passed through a final layer that gives you a percentage for each possible category. Since our project has 70 dog breeds, the model would output something like "65% chance this is a Golden Retriever, 20% Labrador" and so on. This final step uses something called softmax which just converts the raw numbers into probabilities.
+
+What I found most useful from this article is understanding why CNNs are better than regular neural networks for images. A normal neural network would just look at every single pixel individually which is extremely slow and misses the bigger picture. A CNN is smarter because it looks at regions of the image and learns what combinations of pixels actually matter.
 
 ---
 
@@ -27,11 +25,27 @@ features out on its own during training.
 **Link:** https://medium.com/@adarsheluri143/dog-breed-classification-using-resnet-34-a-transfer-learning-approach-0e3a602c2238
 
 ### What I Learned
-Fine-tuning means taking a pretrained model like ResNet34  already trained on millions of 
-ImageNet images and retraining it on a smaller, task specific dataset like dog breeds. 
-Instead of building from scratch, you leverage the model's existing knowledge and adapt it 
-to your specific problem, getting strong results with far less data and compute.
 
-This article is almost exactly what our project is doing, so it was very relevant to read through.
+The main thing I learned from it is what fine tuning actually means in simple terms.
+You take a model called ResNet34 that was already trained on millions of images from the internet. Because of that it already knows how to recognize basic things like shapes, edges and textures. Instead of building a model from zero, you just take that existing model and teach it one new specific thing, in this case dog breeds.
+
+The author used a dataset of 5 dog breeds, organized the images into folders by breed, and used a library called fastai to retrain just the last layers of ResNet-34. The result was a model that could predict the correct breed with 99% accuracy.
+
+
 
 ---
+## Article 3 - Research Paper: CNN + Transfer Learning for Dog Breeds (95%+ Accuracy)
+
+**Title:** "Classification of Dog Breeds Using CNN Models and Support Vector Machine"  
+**Source:** MDPI Bioengineering (Peer Reviewed)  
+**Link:** https://www.mdpi.com/2306-5354/11/11/1157  
+**PubMed:** https://pubmed.ncbi.nlm.nih.gov/39593817/
+
+### What I Learned
+
+The first thing that stood out to me is that they confirmed this is genuinely a hard problem. A lot of dog breeds look almost identical to each other. They gave the example of the English Foxhound, the Beagle, and the Walker Hound, even the researchers said these are hard to tell apart just by looking at them. 
+
+The model they built still struggled with those breeds, getting only around 67% accuracy on them. That is something our team should keep in mind when we look at our results.
+What they did differently from most other researchers is instead of using just one CNN model, they combined four of them together and then used a separate method to pick the most useful features from all four. By doing this they reached 95.24% accuracy on 120 breeds which was better than any other method tested on the same dataset before.
+
+For our project we are only working with 70 breeds. Based on what this paper showed, even a single model can get to around 90% accuracy, so that is a realistic goal for us.

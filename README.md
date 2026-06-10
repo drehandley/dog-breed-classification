@@ -17,7 +17,7 @@ We are training a convolutional neural network to accurately identify dog breeds
 
 ## Dataset
 
-**Dog Breed Image Dataset** — Available on [Kaggle](https://www.kaggle.com/datasets/khushikhushikhushi/dog-breed-image-dataset)
+**Dog Breed Image Dataset** — Available on[ [Kaggle](https://www.kaggle.com/datasets/khushikhushikhushi/dog-breed-image-dataset)](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set)
 
 ---
 

@@ -5,7 +5,9 @@
 ## Article 1 — How CNNs Work for Image Classification
 
 **Title:** "Image Classification with Convolutional Neural Networks (CNNs)"
+
 **Source:** KDnuggets
+
 **Link:** https://www.kdnuggets.com/2022/05/image-classification-convolutional-neural-networks-cnns.html
 
 ### What I Learned
@@ -31,7 +33,9 @@ looks at regions of the image and learns what combinations of pixels actually ma
 ## Article 2 — Dog Breed Classification Using Transfer Learning (ResNet-34)
 
 **Title:** "Dog Breed Classification Using ResNet-34: A Transfer Learning Approach"
+
 **Source:** Medium
+
 **Link:** https://medium.com/@adarsheluri143/dog-breed-classification-using-resnet-34-a-transfer-learning-approach-0e3a602c2238
 
 ### What I Learned
@@ -50,8 +54,11 @@ could predict the correct breed with 99% accuracy.
 ## Article 3 — Research Paper: CNN + Transfer Learning for Dog Breeds (95%+ Accuracy)
 
 **Title:** "Classification of Dog Breeds Using CNN Models and Support Vector Machine"
+
 **Source:** MDPI Bioengineering (Peer Reviewed)
+
 **Link:** https://www.mdpi.com/2306-5354/11/11/1157
+
 **PubMed:** https://pubmed.ncbi.nlm.nih.gov/39593817/
 
 ### What I Learned
@@ -75,7 +82,9 @@ single model can get to around 90% accuracy, so that is a realistic goal for us.
 ## Article 4 — Transfer Learning for Beginners
 
 **Title:** "Transfer Learning For Beginner"
+
 **Source:** Towards Data Science
+
 **Link:** https://towardsdatascience.com/transfer-learning-for-beginner-9b59490d1b9d/
 
 ### What I Learned
@@ -91,7 +100,9 @@ In our case that would be 70 dog breeds instead of 1000 categories.
 ## Article 5 — TensorFlow Official Guide on Transfer Learning
 
 **Title:** "Transfer Learning and Fine-Tuning"
+
 **Source:** TensorFlow Official Documentation
+
 **Link:** https://www.tensorflow.org/tutorials/images/transfer_learning
 
 ### What I Learned
@@ -110,7 +121,9 @@ better results.
 ## Article 6 — Automatic Dog Breed Classification Using Deep Learning
 
 **Title:** "Automatic Dog Breed Classification Using Deep Learning"
+
 **Source:** Applied and Computational Engineering (Peer Reviewed, 2023)
+
 **Link:** https://www.ewadirect.com/proceedings/ace/article/view/2412
 
 ### What I Learned

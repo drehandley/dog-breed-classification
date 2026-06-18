@@ -78,7 +78,11 @@ dog-breed-classification/
 
 - [x] SQL metadata database designed and built (`sprint2_database.py`)
   - Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
-  - ERD diagram created in Lucidchart
+  - ERD diagram designed in Lucidchart before implementation
+
+### Database Schema (ERD)
+
+![Sprint 2 ERD](docs/Sprint%202%20ERD%20-%20Pluto's%20Repawsitory.png)
 - [x] Cleaned CSV (`dogs_updated.csv`) — fixed label whitespace bug, verified 70 breeds
 - [x] Preprocessing pipeline (`02_preprocessing.ipynb`):
   - Custom PyTorch `Dataset` class loading images from CSV
@@ -87,8 +91,8 @@ dog-breed-classification/
   - ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
   - `WeightedRandomSampler` to address class imbalance
   - DataLoaders verified — correct shape, dtype, and value range confirmed
-- [ ] Full Sprint 2 notebook assembled end-to-end and merged to main
-- [ ] README updated ← in progress
+- [x] Full Sprint 2 notebook assembled end-to-end and merged to main
+- [x] README updated
 
 ---
 

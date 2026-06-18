@@ -19,9 +19,9 @@ We're training a convolutional neural network to identify dog breeds from photos
 
 **70 Dog Breeds Image Dataset** — [Kaggle](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set)
 
-- 70 breeds, ~7,946 images
+- 70 breeds, ~8,694 images
 - Pre-split into train, valid, and test folders
-- Images resized to 224x224
+- Images resized to 224×224
 
 ---
 
@@ -36,8 +36,12 @@ dog-breed-classification/
 ├── data/                        # Raw and processed data (gitignored)
 ├── docs/
 │   └── report.md                # Project report
+├── sprint2_database.py          # SQL metadata database script
+├── dogs_updated.csv             # Cleaned CSV (Cameron)
 └── README.md
 ```
+
+> `dog_breeds_metadata.db` is gitignored — run `sprint2_database.py` locally to generate it.
 
 ---
 
@@ -54,14 +58,14 @@ dog-breed-classification/
 
 ## Sprint 1 Deliverables
 
-- [ ] GitHub repo created, all members added as collaborators
-- [ ] Each member has their own branch
-- [ ] Kanban board set up with tasks assigned
-- [ ] Background research — papers and blog posts on dog breed classification / CNNs
-- [ ] Problem definition — questions, features, definition of done
-- [ ] Value statement — why this matters
-- [ ] Limitations — expected challenges
-- [ ] EDA notebook (`01_eda.ipynb`) merged to main covering:
+- [x] GitHub repo created, all members added as collaborators
+- [x] Each member has their own branch
+- [x] Kanban board set up with tasks assigned
+- [x] Background research — papers and blog posts on dog breed classification / CNNs
+- [x] Problem definition — questions, features, definition of done
+- [x] Value statement — why this matters
+- [x] Limitations — expected challenges
+- [x] EDA notebook (`01_eda.ipynb`) merged to main covering:
   - Class distribution bar chart
   - Sample image grid per breed
   - Image dimension distribution
@@ -70,14 +74,32 @@ dog-breed-classification/
 
 ---
 
+## Sprint 2 Deliverables
+
+- [x] SQL metadata database designed and built (`sprint2_database.py`)
+  - Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
+  - ERD diagram created in Lucidchart
+- [x] Cleaned CSV (`dogs_updated.csv`) — fixed label whitespace bug, verified 70 breeds
+- [x] Preprocessing pipeline (`02_preprocessing.ipynb`):
+  - Custom PyTorch `Dataset` class loading images from CSV
+  - Separate transform pipelines for train vs. val/test
+  - Augmentation on train only (RandomHorizontalFlip, RandomRotation, ColorJitter)
+  - ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+  - `WeightedRandomSampler` to address class imbalance
+  - DataLoaders verified — correct shape, dtype, and value range confirmed
+- [ ] Full Sprint 2 notebook assembled end-to-end and merged to main
+- [ ] README updated ← in progress
+
+---
+
 ## Team
 
 | Name | Role |
 |------|------|
-| Dre | Group Lead |
-| Cameron | sample image grid |
-| Manuela | background research on CNNs  |
-| Ozor | checking for any corrupted or missing files |
+| Dre | Group Lead — SQL database, metadata schema, notebook structure |
+| Cameron | Data cleaning — CSV verification, label fixes, image QA |
+| Manuela | Preprocessing pipeline — Dataset class, transforms, augmentation |
+| Ozor | Class imbalance — WeightedRandomSampler, DataLoader setup |
 
 ---
 
@@ -85,7 +107,9 @@ dog-breed-classification/
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat&logo=jupyter&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)
 
 ---

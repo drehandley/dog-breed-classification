@@ -66,31 +66,31 @@ dog-breed-classification/
 - [x] Value statement — why this matters
 - [x] Limitations — expected challenges
 - [x] EDA notebook (`01_eda.ipynb`) merged to main covering:
-  - Class distribution bar chart
-  - Sample image grid per breed
-  - Image dimension distribution
-  - Class imbalance check
-  - Written summary + preprocessing plan for Sprint 2
+- [x] Class distribution bar chart
+- [x]Sample image grid per breed
+-[x]Image dimension distribution
+- [x]Class imbalance check
+- [x]Written summary + preprocessing plan for Sprint 2
 
 ---
 
 ## Sprint 2 Deliverables
 
 - [x] SQL metadata database designed and built (`sprint2_database.py`)
-  - Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
-  - ERD diagram designed in Lucidchart before implementation
+- [x]Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
+-[x] ERD diagram designed in Lucidchart before implementation
 
 ### Database Schema (ERD)
 
 ![Sprint 2 ERD](docs/Sprint%202%20ERD%20-%20Pluto's%20Repawsitory.png)
 - [x] Cleaned CSV (`dogs_updated.csv`) — fixed label whitespace bug, verified 70 breeds
 - [x] Preprocessing pipeline (`02_preprocessing.ipynb`):
-  - Custom PyTorch `Dataset` class loading images from CSV
-  - Separate transform pipelines for train vs. val/test
-  - Augmentation on train only (RandomHorizontalFlip, RandomRotation, ColorJitter)
-  - ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-  - `WeightedRandomSampler` to address class imbalance
-  - DataLoaders verified — correct shape, dtype, and value range confirmed
+- [x] Custom PyTorch `Dataset` class loading images from CSV
+- [x] Separate transform pipelines for train vs. val/test
+-[x] Augmentation on train only (RandomHorizontalFlip, RandomRotation, ColorJitter)
+- [x]ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+- [x]`WeightedRandomSampler` to address class imbalance
+- [x]DataLoaders verified — correct shape, dtype, and value range confirmed
 - [x] Full Sprint 2 notebook assembled end-to-end and merged to main
 - [x] README updated
 

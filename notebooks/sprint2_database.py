@@ -141,7 +141,7 @@ print(f"  Duplicate files found: {metadata_df['duplicate_flagged'].sum()}")
 #   if_exists='replace' → if the table already exists, overwrite it (safe to re-run)
 #   index=True, index_label='image_id' → uses the row number as our primary key
 
-db_path = 'dog_breeds_metadata.db'
+db_path = 'pluto_repository.db'
 conn = sqlite3.connect(db_path)
 
 metadata_df.to_sql(

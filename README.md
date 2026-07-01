@@ -30,10 +30,13 @@ We're training a convolutional neural network to identify dog breeds from photos
 ```
 dog-breed-classification/
 ├── notebooks/
-│   ├── 01_eda.ipynb              # Exploratory data analysis
-│   ├── 02_preprocessing.ipynb   # Cleaning, resizing, augmentation
-│   └── 03_modeling.ipynb        # CNN training and evaluation
+│   ├── 01_eda.ipynb                        # Exploratory data analysis
+│   ├── 02_preprocessing.ipynb              # Cleaning, resizing, augmentation
+│   ├── 03_model_training.ipynb             # MobileNetV2 training and evaluation
+│   └── 03_model_training_resnet50.ipynb    # ResNet50 training and evaluation (Colab)
 ├── data/                        # Raw and processed data (gitignored)
+├── models/                      # Saved model weights (gitignored)
+├── outputs/                     # Plots and evaluation outputs (gitignored)
 ├── docs/
 │   └── report.md                # Project report
 ├── sprint2_database.py          # SQL metadata database script
@@ -66,33 +69,57 @@ dog-breed-classification/
 - [x] Value statement — why this matters
 - [x] Limitations — expected challenges
 - [x] EDA notebook (`01_eda.ipynb`) merged to main covering:
-- [x] Class distribution bar chart
-- [x]Sample image grid per breed
--[x]Image dimension distribution
-- [x]Class imbalance check
-- [x]Written summary + preprocessing plan for Sprint 2
+  - Class distribution bar chart
+  - Sample image grid per breed
+  - Image dimension distribution
+  - Class imbalance check
+  - Written summary + preprocessing plan for Sprint 2
 
 ---
 
 ## Sprint 2 Deliverables
 
 - [x] SQL metadata database designed and built (`sprint2_database.py`)
-- [x]Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
--[x] ERD diagram designed in Lucidchart before implementation
+  - Stores file path, label, split, height, width, channels, format, duplicate flag, corrupted flag for all 8,694 images
+  - ERD diagram designed in Lucidchart before implementation
 
 ### Database Schema (ERD)
 
 ![Sprint 2 ERD](docs/Sprint%202%20ERD%20-%20Pluto's%20Repawsitory.png)
 - [x] Cleaned CSV (`dogs_updated.csv`) — fixed label whitespace bug, verified 70 breeds
 - [x] Preprocessing pipeline (`02_preprocessing.ipynb`):
-- [x] Custom PyTorch `Dataset` class loading images from CSV
-- [x] Separate transform pipelines for train vs. val/test
--[x] Augmentation on train only (RandomHorizontalFlip, RandomRotation, ColorJitter)
-- [x]ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-- [x]`WeightedRandomSampler` to address class imbalance
-- [x]DataLoaders verified — correct shape, dtype, and value range confirmed
+  - Custom PyTorch `Dataset` class loading images from CSV
+  - Separate transform pipelines for train vs. val/test
+  - Augmentation on train only (RandomHorizontalFlip, RandomRotation, ColorJitter)
+  - ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+  - `WeightedRandomSampler` to address class imbalance
+  - DataLoaders verified — correct shape, dtype, and value range confirmed
 - [x] Full Sprint 2 notebook assembled end-to-end and merged to main
 - [x] README updated
+
+---
+
+## Sprint 3 Deliverables
+
+- [x] Model architecture set up — MobileNetV2 (pretrained, frozen base, Linear(1280, 70) head)
+- [x] ResNet50 trained on Google Colab GPU — Linear(2048, 70) head, 143,430 trainable parameters
+- [x] Both models trained for 15 epochs using CrossEntropyLoss + Adam optimizer
+- [ ] Training loop — Cameron (cross entropy loss, Adam, train/val loop)
+- [ ] Loss curve plots + written interpretation — Ozor
+- [ ] Evaluation metrics + confusion matrix — Manuela (accuracy, precision, recall, F1)
+- [ ] Written performance analysis comparing MobileNetV2 vs ResNet50
+- [ ] All sections merged into single notebook on main
+- [ ] Notebook run top to bottom with all cell outputs visible
+- [ ] README updated
+
+### Sprint 3 Results (ResNet50 — Google Colab T4 GPU)
+
+| Metric | Score |
+|--------|-------|
+| Accuracy | 96.14% |
+| Precision | 96.30% |
+| Recall | 96.14% |
+| F1 Score | 96.09% |
 
 ---
 

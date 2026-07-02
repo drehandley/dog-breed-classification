@@ -79,7 +79,7 @@ Lightweight architecture (89,670 trainable parameters vs ResNet50's 143,430). Op
 
 70 breeds, ~8,694 images, pre-split into train / valid / test. Images resized to 224×224. We used the dataset's built-in 70/15/15 split rather than the common 80/20 default, giving the model more meaningful validation signal across rare breeds.
 
-![Tableau Breed Distribution](outputs/tableau_breed_distribution.png)
+![Breed Distribution Dashboard](outputs/tableau_breed_distribution.png)
 
 ## Database Schema
 

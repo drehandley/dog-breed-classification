@@ -50,13 +50,13 @@ We trained two models and compared performance on 700 held-out test images acros
 
 **Loss Curves**
 
-![ResNet50 Loss Curve](outputs/resnet50_loss_curve.png)
+![ResNet50 Loss Curve](outputs/resnet50_confusion_matrix.png)
 
 Train loss dropped from 1.78 to 0.04 over 15 epochs. Validation loss stabilized around 0.43 by epoch 4 — clean convergence, no overfitting.
 
 **Confusion Matrix**
 
-![ResNet50 Confusion Matrix](outputs/resnet50_confusion_matrix.png)
+![ResNet50 Confusion Matrix](outputs/resnet50_loss_curve.png)
 
 Near-perfect diagonal across all 70 classes. The few misclassifications cluster around visually similar breeds — Golden Retrievers vs. Labradors, similar Terrier varieties.
 
@@ -83,7 +83,7 @@ Lightweight architecture (89,670 trainable parameters vs ResNet50's 143,430). Op
 
 ## Database Schema
 
-![ERD](<docs/Sprint 2 ERD – Pluto's Repawsitory.png>)
+![ERD](docs/Sprint%202%20ERD%20-%20Pluto's%20Repawsitory.png)
 
 ---
 

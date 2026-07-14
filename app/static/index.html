@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pluto's Repawsitory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f0f0f8;
+      --surface:  #ffffff;
+      --surface-2:#e8e8f2;
+      --glass:    rgba(0,0,0,0.03);
+      --glass-1:  rgba(0,0,0,0.055);
+      --border:   rgba(0,0,0,0.09);
+      --border-1: rgba(0,0,0,0.15);
+      --text:     #0c0c1e;
+      --text-2:   #5a5a7a;
+      --text-3:   #9898b8;
+      --red:      #CC0000;
+      --red-dim:  rgba(204,0,0,0.08);
+      --red-line: rgba(204,0,0,0.20);
+      --green:    #0a9e6a;
+      --yellow:   #b87000;
+      --blue:     #3B4CCA;
+      --mono:     'Space Mono', monospace;
+      --display:  'Bebas Neue', sans-serif;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(circle, rgba(0,0,30,.07) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Utility overlays ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: var(--red); z-index: 9999; opacity: 0;
+      border-radius: 0 2px 2px 0; pointer-events: none;
+      box-shadow: 0 0 10px 2px rgba(220,38,38,.55);
+    }
+    #flash-overlay {
+      position: fixed; inset: 0; z-index: 800;
+      background: #fff; opacity: 0; pointer-events: none;
+    }
+    #flash-overlay.flash { animation: flash-anim .6s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes flash-anim { 0%{opacity:0} 18%{opacity:.92} 100%{opacity:0} }
+
+    /* ═══════════════════════
+       NAV
+    ═══════════════════════ */
+    nav {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 28px;
+      height: 60px;
+      background: rgba(240,240,248,.92);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      z-index: 200;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 11px; }
+    .nav-logo {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: var(--red); display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .7rem; font-weight: 700; color: #fff;
+    }
+    .nav-title { font-size: .875rem; font-weight: 600; letter-spacing: -.015em; }
+    .nav-sub {
+      display: block; font-size: .58rem; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-top: 1px;
+    }
+
+    .nav-tabs {
+      display: flex; gap: 2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: 9px; padding: 3px;
+    }
+    .tab-btn {
+      background: none; border: none;
+      color: var(--text-2); font-family: 'Inter', sans-serif;
+      font-size: .75rem; font-weight: 600;
+      letter-spacing: .05em; text-transform: uppercase;
+      padding: 6px 18px; border-radius: 7px; cursor: pointer; transition: all .18s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--glass-1); }
+    .tab-btn.active { background: var(--red); color: #fff; }
+
+    .nav-right {
+      display: flex; align-items: center; justify-content: flex-end; gap: 7px;
+    }
+    .nav-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green);
+      animation: dot-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .nav-status {
+      font-family: var(--mono); font-size: .42rem;
+      letter-spacing: .04em; color: var(--text-3); line-height: 1;
+    }
+
+    /* ═══════════════════════
+       VIEWS
+    ═══════════════════════ */
+    .view { display: none; flex: 1; overflow: hidden; min-height: 0; }
+    .view.active { display: grid; }
+
+    /* ═══════════════════════
+       SCAN VIEW
+    ═══════════════════════ */
+    #scan-view { grid-template-columns: 1fr 1fr; }
+
+    /* Left col */
+    .scan-left {
+      display: flex; flex-direction: column;
+      padding: 40px 36px 28px;
+      border-right: 1px solid var(--border);
+      overflow-y: auto; scrollbar-width: none;
+      gap: 0;
+    }
+    .scan-left::-webkit-scrollbar { display: none; }
+
+    .scan-eyebrow {
+      font-family: var(--mono); font-size: .46rem;
+      letter-spacing: .06em;
+      color: var(--yellow); opacity: .9; margin-bottom: 16px;
+      line-height: 1.9;
+    }
+    .scan-h1 {
+      font-family: var(--display);
+      font-size: 5.5rem; font-weight: 400;
+      letter-spacing: .03em; line-height: .92;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .scan-h1 strong {
+      font-weight: 400; font-style: normal; color: var(--yellow); display: block;
+    }
+    .scan-sub {
+      font-size: .82rem; color: var(--text-2); line-height: 1.65;
+      max-width: 310px; margin-top: 10px; margin-bottom: 28px;
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      flex: 1; min-height: 180px; border-radius: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; cursor: pointer;
+      position: relative; transition: background .2s; border: none;
+      background:
+        linear-gradient(var(--red-line),var(--red-line)) 0    0   /24px 1.5px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 0    0   /1.5px 24px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 100% 0   /24px 1.5px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 100% 0   /1.5px 24px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 0    100%/24px 1.5px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 0    100%/1.5px 24px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 100% 100%/24px 1.5px no-repeat,
+        linear-gradient(var(--red-line),var(--red-line)) 100% 100%/1.5px 24px no-repeat,
+        var(--glass);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      background:
+        linear-gradient(var(--red),var(--red)) 0    0   /24px 1.5px no-repeat,
+        linear-gradient(var(--red),var(--red)) 0    0   /1.5px 24px no-repeat,
+        linear-gradient(var(--red),var(--red)) 100% 0   /24px 1.5px no-repeat,
+        linear-gradient(var(--red),var(--red)) 100% 0   /1.5px 24px no-repeat,
+        linear-gradient(var(--red),var(--red)) 0    100%/24px 1.5px no-repeat,
+        linear-gradient(var(--red),var(--red)) 0    100%/1.5px 24px no-repeat,
+        linear-gradient(var(--red),var(--red)) 100% 100%/24px 1.5px no-repeat,
+        linear-gradient(var(--red),var(--red)) 100% 100%/1.5px 24px no-repeat,
+        var(--red-dim);
+    }
+    #file-input { position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2; }
+    .upload-icon {
+      width:46px;height:46px;border-radius:9px;
+      border:1px solid var(--border-1);background:var(--glass-1);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--text-2);margin-bottom:12px;pointer-events:none;
+    }
+    .upload-zone h3 { font-size:.88rem;font-weight:600;margin-bottom:3px;pointer-events:none; }
+    .upload-zone p  { font-size:.76rem;color:var(--text-2);pointer-events:none; }
+    .upload-zone p span { color:var(--red);text-decoration:underline; }
+
+    /* Preview frame */
+    #preview-wrap {
+      flex:1;min-height:180px;
+      display:none;flex-direction:column;
+    }
+    .preview-frame {
+      flex:1;position:relative;border-radius:10px;
+      overflow:hidden;background:var(--surface);
+    }
+    #preview {
+      width:100%;height:100%;object-fit:contain;display:block;
+      transition:filter .55s ease;
+      background: #f0f0f8;
+    }
+    #preview.silhouette { filter:brightness(0) opacity(.85); }
+
+    /* Who's that overlay */
+    .whos-overlay {
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      z-index:6;pointer-events:none;
+      opacity:0;transition:opacity .35s;
+      background:rgba(240,240,248,.15);
+    }
+    .whos-overlay.show { opacity:1; }
+    .whos-text {
+      font-family: var(--display);
+      font-size:2rem;font-weight:400;letter-spacing:.05em;
+      text-align:center;line-height:1.15;
+      color:rgba(12,12,30,.95);
+      text-shadow:0 2px 24px rgba(255,255,255,.8);margin-bottom:4px;
+    }
+    .whos-text strong { color:var(--yellow);display:block; }
+    .whos-q {
+      font-family: var(--display);
+      font-size:7rem;font-weight:400;color:var(--yellow);line-height:.85;
+      text-shadow:0 0 50px rgba(255,203,5,.5),0 0 100px rgba(255,203,5,.2);
+      animation:q-pulse 1.9s ease-in-out infinite;display:block;
+    }
+    @keyframes q-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(.92);opacity:.6} }
+
+    /* Scan overlay */
+    .scan-overlay {
+      position:absolute;inset:0;z-index:10;
+      background:rgba(240,240,248,.5);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    .scan-line {
+      position:absolute;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,transparent 0%,var(--red) 30%,var(--red) 70%,transparent 100%);
+      box-shadow:0 0 18px 4px rgba(220,38,38,.55);
+      animation:sweep 1.1s linear infinite;
+    }
+    @keyframes sweep { 0%{top:0%;opacity:1} 90%{top:100%;opacity:1} 100%{top:100%;opacity:0} }
+    .scan-rings { position:absolute;inset:0;display:flex;align-items:center;justify-content:center; }
+    .scan-ring {
+      position:absolute;border-radius:50%;
+      border:1px solid rgba(220,38,38,.32);
+      width:52px;height:52px;
+      animation:ring-expand 2s ease-out infinite;
+    }
+    .scan-ring:nth-child(2){animation-delay:.65s}
+    .scan-ring:nth-child(3){animation-delay:1.3s}
+    @keyframes ring-expand { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(6);opacity:0} }
+    .scan-reticle { position:absolute;width:50px;height:50px;z-index:3; }
+    .reticle-h {
+      position:absolute;top:50%;left:0;right:0;height:1px;
+      background:rgba(220,38,38,.65);transform:translateY(-50%);
+      box-shadow:0 0 8px rgba(220,38,38,.4);
+    }
+    .reticle-v {
+      position:absolute;left:50%;top:0;bottom:0;width:1px;
+      background:rgba(220,38,38,.65);transform:translateX(-50%);
+      box-shadow:0 0 8px rgba(220,38,38,.4);
+    }
+    .scan-label {
+      font-family:var(--mono);font-size:.56rem;font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(12,12,30,.9);
+      background:rgba(240,240,248,.82);padding:5px 14px;border-radius:4px;
+      position:relative;z-index:4;backdrop-filter:blur(4px);
+    }
+
+    .preview-footer {
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 2px 0;
+    }
+    .preview-filename {
+      font-family:var(--mono);font-size:.68rem;color:var(--text-2);
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;
+    }
+    .change-photo {
+      font-size:.7rem;font-weight:600;color:var(--text-3);
+      cursor:pointer;transition:color .2s;flex-shrink:0;
+    }
+    .change-photo:hover { color:var(--red); }
+
+    #scan-btn {
+      display:none;margin-top:12px;width:100%;
+      padding:14px;background:var(--red);border:none;border-radius:10px;
+      color:#fff;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+      transition:opacity .2s,transform .15s;
+    }
+    #scan-btn:hover:not(:disabled){opacity:.86;transform:translateY(-1px)}
+    #scan-btn:disabled{opacity:.35;cursor:default}
+    #scan-error {
+      display:none;margin-top:8px;padding:10px 14px;
+      background:var(--red-dim);border:1px solid var(--red-line);
+      border-radius:8px;font-size:.78rem;color:#f87171;line-height:1.5;
+    }
+
+    /* Stat strip */
+    .scan-stats {
+      display:flex;border:1px solid var(--border);
+      border-radius:10px;overflow:hidden;margin-top:24px;flex-shrink:0;
+    }
+    .stat-pill {
+      flex:1;padding:11px 0;text-align:center;
+      border-right:1px solid var(--border);
+    }
+    .stat-pill:last-child{border-right:none}
+    .stat-pill-num {
+      font-family:var(--mono);font-size:.78rem;
+      color:var(--yellow);display:block;margin-bottom:5px;line-height:1;
+    }
+    .stat-pill-lbl {
+      font-family:var(--mono);font-size:.38rem;letter-spacing:.04em;
+      color:var(--text-3);display:block;line-height:1.6;
+    }
+
+    /* ── Right col: result ── */
+    .scan-right { overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent; }
+    .scan-right::-webkit-scrollbar{width:4px}
+    .scan-right::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+    .result-empty {
+      height:100%;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      color:var(--text-3);padding:40px;text-align:center;
+    }
+    .result-empty-glyph {
+      font-family:'Cormorant Garamond',serif;
+      font-size:7rem;font-weight:300;font-style:italic;
+      color:var(--text-3);line-height:1;margin-bottom:14px;opacity:.3;
+    }
+    .result-empty p { font-size:.8rem;line-height:1.65;max-width:200px; }
+
+    .result-card {
+      display:none;padding:36px 36px 40px;
+      animation:result-in .38s cubic-bezier(.16,.72,.28,1);
+    }
+    @keyframes result-in { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+    .result-top-row {
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:3px;
+    }
+    .result-num {
+      font-family:var(--mono);font-size:.55rem;
+      color:var(--yellow);letter-spacing:.05em;
+    }
+    .result-name {
+      font-family: var(--display);
+      font-size:4.8rem;font-weight:400;letter-spacing:.03em;line-height:.92;
+      color:var(--text);margin-bottom:14px;
+    }
+    .result-chips {
+      display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:22px;
+    }
+    .result-conf {
+      font-family:var(--mono);font-size:.46rem;
+      padding:5px 10px;border-radius:5px;line-height:1;
+    }
+    .result-speed {
+      font-family:var(--mono);font-size:.46rem;
+      padding:5px 10px;border-radius:5px;line-height:1;
+      border:1px solid rgba(16,185,129,.25);background:rgba(16,185,129,.07);
+      color:var(--green);display:none;
+    }
+    .conf-high{border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981}
+    .conf-mid {border:1px solid rgba(217,119,6,.25);background:rgba(217,119,6,.08);color:#d97706}
+    .conf-low {border:1px solid rgba(220,38,38,.25);background:rgba(220,38,38,.08);color:#ef4444}
+
+    .result-divider{height:1px;background:var(--border);margin:18px 0}
+    .section-lbl {
+      font-family:var(--mono);font-size:.44rem;letter-spacing:.06em;
+      color:var(--text-3);margin-bottom:12px;line-height:1.9;
+    }
+    .result-fact {
+      font-size:.875rem;line-height:1.72;
+      color:rgba(12,12,30,.6);margin-bottom:0;
+    }
+
+    /* Stat bars */
+    .rs-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .rs-label{width:96px;font-size:.67rem;font-weight:600;letter-spacing:.04em;color:var(--text-2);flex-shrink:0}
+    .rs-track{flex:1;height:4px;background:rgba(0,0,0,.09);border-radius:999px;overflow:hidden}
+    .rs-fill{height:100%;border-radius:999px;width:0%;transition:width .9s cubic-bezier(.16,.72,.28,1)}
+    .rs-val{font-family:var(--mono);width:26px;text-align:right;font-size:.45rem;color:var(--text-2);flex-shrink:0;line-height:1}
+
+    /* Alt predictions */
+    .result-alts{display:none}
+    .alt-row{
+      display:flex;align-items:center;gap:10px;
+      padding:8px 12px;border:1px solid var(--border);
+      border-radius:8px;margin-bottom:5px;background:var(--glass);
+    }
+    .alt-rank{font-family:var(--mono);font-size:.44rem;color:var(--text-3);width:14px;flex-shrink:0;line-height:1}
+    .alt-name{flex:1;font-size:.8rem;font-weight:600}
+    .alt-track{width:56px;height:3px;background:rgba(0,0,0,.09);border-radius:999px;overflow:hidden}
+    .alt-fill{height:100%;background:var(--yellow);border-radius:999px;width:0%;transition:width .85s cubic-bezier(.16,.72,.28,1)}
+    .alt-pct{font-family:var(--mono);font-size:.44rem;color:var(--yellow);width:36px;text-align:right;flex-shrink:0;line-height:1}
+
+    .result-again {
+      margin-top:22px;width:100%;padding:12px;
+      background:none;border:1px solid var(--border-1);border-radius:10px;
+      color:var(--text-2);font-family:'Inter',sans-serif;font-size:.76rem;font-weight:600;
+      letter-spacing:.04em;cursor:pointer;transition:all .2s;
+    }
+    .result-again:hover{border-color:var(--red-line);color:var(--text)}
+
+    /* ═══════════════════════
+       LIBRARY VIEW
+    ═══════════════════════ */
+    #library-view { grid-template-columns: 340px 1fr; }
+
+    /* Featured panel (left) */
+    .lib-featured {
+      position:relative;overflow:hidden;
+      border-right:1px solid var(--border);background:var(--surface);
+    }
+    .lib-hero {
+      position:absolute;inset:0;width:100%;height:100%;
+      object-fit:cover;transition:opacity .45s ease;
+    }
+    .lib-hero-fade {
+      position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(240,240,248,.97) 0%,rgba(240,240,248,.55) 50%,rgba(240,240,248,.1) 100%);
+      z-index:2;
+    }
+    .lib-placeholder {
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;
+      letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,30,.05);z-index:1;
+    }
+    .lib-info {
+      position:absolute;inset:0;z-index:3;
+      display:flex;flex-direction:column;justify-content:flex-end;
+      padding:24px;
+      transition:opacity .22s ease,transform .26s ease;
+    }
+    .lib-info.switching{opacity:0;transform:translateY(10px)}
+    .lib-info-num {
+      font-family:var(--mono);font-size:.52rem;
+      color:var(--yellow);opacity:.8;margin-bottom:5px;line-height:1.6;
+    }
+    .lib-info-name {
+      font-family: var(--display);
+      font-size:3.4rem;font-weight:400;letter-spacing:.04em;line-height:.92;
+      color:var(--text);margin-bottom:9px;
+    }
+    .lib-info-fact {
+      font-size:.76rem;line-height:1.65;color:rgba(12,12,30,.5);
+      margin-top:8px;
+      display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    }
+    .lib-info-stats{margin-top:14px}
+    .lib-stat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+    .lib-stat-lbl{font-size:.58rem;font-weight:600;letter-spacing:.04em;color:rgba(12,12,30,.4);width:86px;flex-shrink:0}
+    .lib-stat-track{flex:1;height:2.5px;background:rgba(0,0,0,.09);border-radius:999px;overflow:hidden}
+    .lib-stat-fill{height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.16,.72,.28,1)}
+
+    /* Type badge */
+    .type-badge {
+      display:inline-block;font-size:.54rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;
+      padding:3px 8px;border-radius:4px;color:#fff;
+    }
+    .t-Herding      {background:#065f46}
+    .t-Hound        {background:#92400e}
+    .t-Sporting     {background:#1e3a8a}
+    .t-Terrier      {background:#7f1d1d}
+    .t-Toy          {background:#831843}
+    .t-Working      {background:#4c1d95}
+    .t-Non-Sporting {background:#1e293b}
+    .t-Hybrid       {background:#164e63}
+    .t-Wild         {background:#422006}
+
+    /* Right panel: list */
+    .lib-panel{display:flex;flex-direction:column;overflow:hidden}
+
+    .lib-toolbar{
+      padding:14px 18px 10px;border-bottom:1px solid var(--border);
+      display:flex;gap:10px;align-items:center;flex-shrink:0;
+    }
+    .search-wrap{flex:1;position:relative;display:flex;align-items:center}
+    .search-ico{position:absolute;left:11px;color:var(--text-3);pointer-events:none;display:flex}
+    #search-input{
+      width:100%;background:var(--surface-2);border:1px solid var(--border);
+      border-radius:7px;padding:8px 12px 8px 33px;
+      color:var(--text);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;
+      transition:border-color .2s;
+    }
+    #search-input:focus{border-color:rgba(220,38,38,.3)}
+    #search-input::placeholder{color:var(--text-3)}
+    .count-chip{
+      flex-shrink:0;border:1px solid var(--border);border-radius:6px;
+      padding:6px 11px;font-family:var(--mono);font-size:.62rem;
+      font-weight:700;color:var(--text-3);white-space:nowrap;
+    }
+    .count-chip b{color:var(--text-2)}
+
+    .filter-row{
+      padding:9px 18px;display:flex;flex-wrap:wrap;gap:5px;
+      border-bottom:1px solid var(--border);flex-shrink:0;
+    }
+    .filter-btn{
+      background:none;border:1px solid var(--border);border-radius:5px;
+      color:var(--text-3);font-family:'Inter',sans-serif;
+      font-size:.6rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+      padding:4px 9px;cursor:pointer;transition:all .15s;
+    }
+    .filter-btn:hover{border-color:var(--border-1);color:var(--text-2)}
+    .filter-btn.active{color:#fff;border-color:transparent}
+
+    .breed-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+    .breed-list::-webkit-scrollbar{width:4px}
+    .breed-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+    .breed-row{
+      display:flex;align-items:center;gap:11px;
+      padding:9px 18px;border-bottom:1px solid var(--border);
+      cursor:pointer;transition:background .14s;position:relative;
+    }
+    .breed-row:hover{background:var(--glass)}
+    .breed-row.selected{background:var(--glass-1)}
+    .breed-row.selected::before{
+      content:'';position:absolute;left:0;top:0;bottom:0;
+      width:2px;background:var(--red);border-radius:0 2px 2px 0;
+    }
+    .breed-row-num{font-family:var(--mono);font-size:.44rem;color:var(--text-3);width:34px;flex-shrink:0;line-height:1}
+    .breed-row-img{
+      width:34px;height:34px;border-radius:6px;
+      object-fit:cover;background:var(--surface-2);flex-shrink:0;
+      opacity:0;transition:opacity .4s;
+    }
+    .breed-row-img.loaded{opacity:1}
+    .breed-row-name{flex:1;font-size:.82rem;font-weight:500}
+
+    .list-empty{padding:48px 24px;text-align:center;color:var(--text-3);font-size:.8rem;display:none}
+
+    /* Sparks */
+    .spark{position:fixed;border-radius:50%;pointer-events:none;animation:fall linear forwards;z-index:999}
+    @keyframes fall{0%{transform:translateY(0)rotate(0);opacity:1}100%{transform:translateY(110vh)rotate(720deg);opacity:0}}
+
+    /* Footer */
+    footer{
+      flex-shrink:0;padding:12px 28px;
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .footer-l,.footer-r{
+      font-size:.58rem;font-weight:500;letter-spacing:.06em;
+      text-transform:uppercase;color:var(--text-3);
+    }
+
+    @media(max-width:800px){
+      html,body{overflow:auto}
+      #scan-view{grid-template-columns:1fr;grid-template-rows:auto auto}
+      .scan-right{border-top:1px solid var(--border)}
+      #library-view{grid-template-columns:1fr;grid-template-rows:320px 1fr}
+      .nav-right{display:none}
+      nav{grid-template-columns:1fr auto}
+      footer{flex-direction:column;gap:3px;text-align:center}
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="flash-overlay"></div>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">P</div>
+    <div>
+      <span class="nav-title">Pluto's Repawsitory</span>
+      <span class="nav-sub">Group 2 · The Knowledge House</span>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" data-tab="scan">Scan</button>
+    <button class="tab-btn" data-tab="library">Library</button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-dot"></span>
+    <span class="nav-status">MobileNetV2 · Live</span>
+  </div>
+</nav>
+
+<!-- ════════ SCAN VIEW ════════ -->
+<div id="scan-view" class="view active">
+
+  <div class="scan-left">
+    <div class="scan-eyebrow">Pluto — Neural Breed Classification</div>
+    <h1 class="scan-h1">Who's that<br><strong>dog?</strong></h1>
+    <p class="scan-sub">Upload a photo and our neural network classifies it across 69 breeds in seconds.</p>
+
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept="image/*" />
+      <div class="upload-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h3>Drop a photo here</h3>
+      <p>or <span>click to browse</span></p>
+    </div>
+
+    <div id="preview-wrap">
+      <div class="preview-frame">
+        <img id="preview" src="" alt="Dog photo" />
+        <div class="whos-overlay" id="whos-overlay">
+          <span class="whos-text">Who's that<br><strong>dog breed?</strong></span>
+          <span class="whos-q">?</span>
+        </div>
+        <div class="scan-overlay" id="scan-overlay" style="display:none">
+          <div class="scan-line"></div>
+          <div class="scan-rings">
+            <div class="scan-ring"></div><div class="scan-ring"></div><div class="scan-ring"></div>
+          </div>
+          <div class="scan-reticle"><div class="reticle-h"></div><div class="reticle-v"></div></div>
+          <div class="scan-label">Analyzing breed signatures&nbsp;&nbsp;…</div>
+        </div>
+      </div>
+      <div class="preview-footer">
+        <span class="preview-filename" id="preview-name"></span>
+        <span class="change-photo" id="change-photo">Remove</span>
+      </div>
+    </div>
+
+    <button id="scan-btn">Reveal Breed</button>
+    <div id="scan-error"></div>
+
+    <div class="scan-stats">
+      <div class="stat-pill"><span class="stat-pill-num sn">69</span><span class="stat-pill-lbl">Breeds</span></div>
+      <div class="stat-pill"><span class="stat-pill-num sn">95.75%</span><span class="stat-pill-lbl">Accuracy</span></div>
+      <div class="stat-pill"><span class="stat-pill-num sn">8.6K</span><span class="stat-pill-lbl">Training</span></div>
+      <div class="stat-pill"><span class="stat-pill-num">CPU</span><span class="stat-pill-lbl">Inference</span></div>
+    </div>
+  </div>
+
+  <div class="scan-right">
+    <div class="result-empty" id="result-empty">
+      <div class="result-empty-glyph">?</div>
+      <p>Upload a photo to identify the breed.</p>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-top-row">
+        <span class="result-num" id="result-num">#001</span>
+        <span class="type-badge" id="result-badge">—</span>
+      </div>
+      <div class="result-name" id="result-name">—</div>
+      <div class="result-chips">
+        <span class="result-conf" id="result-conf"></span>
+        <span class="result-speed" id="result-speed"></span>
+      </div>
+      <div class="section-lbl">Story</div>
+      <div class="result-fact" id="result-fact"></div>
+      <div class="result-divider"></div>
+      <div class="section-lbl">Base Stats</div>
+      <div id="result-stat-rows"></div>
+      <div class="result-alts" id="result-alts">
+        <div class="result-divider"></div>
+        <div class="section-lbl">Also Considered</div>
+        <div id="result-alts-list"></div>
+      </div>
+      <button class="result-again" id="result-again">Scan Another Photo</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════ LIBRARY VIEW ════════ -->
+<div id="library-view" class="view">
+
+  <div class="lib-featured">
+    <span class="lib-placeholder" id="lib-placeholder">Specimen</span>
+    <img class="lib-hero" id="lib-hero" style="opacity:0" alt="" />
+    <div class="lib-hero-fade"></div>
+    <div class="lib-info" id="lib-info">
+      <div class="lib-info-num" id="lib-num">#001</div>
+      <div class="lib-info-name" id="lib-name">Afghan</div>
+      <span class="type-badge" id="lib-badge">Hound</span>
+      <div class="lib-info-fact" id="lib-fact"></div>
+      <div class="lib-info-stats" id="lib-stats"></div>
+    </div>
+  </div>
+
+  <div class="lib-panel">
+    <div class="lib-toolbar">
+      <div class="search-wrap">
+        <span class="search-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <input type="text" id="search-input" placeholder="Search breeds…" autocomplete="off" />
+      </div>
+      <div class="count-chip"><b id="visible-count">69</b>&thinsp;/&thinsp;69</div>
+    </div>
+    <div class="filter-row" id="filter-row">
+      <button class="filter-btn active" data-group="All">All</button>
+      <button class="filter-btn" data-group="Herding">Herding</button>
+      <button class="filter-btn" data-group="Hound">Hound</button>
+      <button class="filter-btn" data-group="Sporting">Sporting</button>
+      <button class="filter-btn" data-group="Terrier">Terrier</button>
+      <button class="filter-btn" data-group="Toy">Toy</button>
+      <button class="filter-btn" data-group="Working">Working</button>
+      <button class="filter-btn" data-group="Non-Sporting">Non-Sporting</button>
+      <button class="filter-btn" data-group="Hybrid">Hybrid</button>
+      <button class="filter-btn" data-group="Wild">Wild</button>
+    </div>
+    <div class="breed-list" id="breed-list">
+      <div class="list-empty" id="list-empty">No breeds found</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="footer-l">Pluto's Repawsitory · Sprint 4 · Group 2</span>
+  <span class="footer-r">PyTorch · MobileNetV2 · The Knowledge House</span>
+</footer>
+
+<script>
+/* ═══════ DATA ═══════ */
+const BREEDS = [
+  {id:1,  name:'Afghan',           group:'Hound',        api:'hound/afghan',
+   stats:{Loyalty:72,Intelligence:65,Energy:75,Fluffiness:90,Trainability:45,Friendliness:60},
+   fact:'One of the oldest dog breeds — bred in the mountains of Afghanistan and clocked near 40 mph.'},
+  {id:2,  name:'African Wild Dog', group:'Wild',         api:null,
+   stats:{Loyalty:85,Intelligence:75,Energy:95,Fluffiness:20,Trainability:30,Friendliness:40},
+   fact:'Not domesticated. No two African Wild Dogs share the same coat pattern.'},
+  {id:3,  name:'Airedale',         group:'Terrier',      api:'airedale',
+   stats:{Loyalty:82,Intelligence:80,Energy:85,Fluffiness:60,Trainability:75,Friendliness:78},
+   fact:'The "King of Terriers" — the largest of all terrier breeds. Served as WWI messenger dogs.'},
+  {id:4,  name:'American Hairless',group:'Terrier',      api:'terrier/american',
+   stats:{Loyalty:88,Intelligence:75,Energy:70,Fluffiness:5,Trainability:82,Friendliness:90},
+   fact:'One of the only hairless breeds native to the US and genuinely hypoallergenic.'},
+  {id:5,  name:'American Spaniel', group:'Sporting',     api:'spaniel/cocker',
+   stats:{Loyalty:88,Intelligence:78,Energy:80,Fluffiness:65,Trainability:82,Friendliness:90},
+   fact:'Bred to flush birds from dense cover, the American Spaniel brings boundless energy to everything.'},
+  {id:6,  name:'Basenji',          group:'Hound',        api:'basenji',
+   stats:{Loyalty:70,Intelligence:72,Energy:85,Fluffiness:30,Trainability:40,Friendliness:65},
+   fact:'The "barkless dog" from Central Africa — instead of barking, Basenjis produce a unique yodel called a baroo.'},
+  {id:7,  name:'Basset',           group:'Hound',        api:'basset',
+   stats:{Loyalty:82,Intelligence:65,Energy:45,Fluffiness:40,Trainability:55,Friendliness:85},
+   fact:'Those long velvety ears sweep scents upward toward one of the most powerful noses in the canine world.'},
+  {id:8,  name:'Beagle',           group:'Hound',        api:'beagle',
+   stats:{Loyalty:85,Intelligence:70,Energy:80,Fluffiness:40,Trainability:68,Friendliness:90},
+   fact:'Beagles are deployed at airports worldwide to sniff out contraband — their noses have 220 million scent receptors.'},
+  {id:9,  name:'Bearded Collie',   group:'Herding',      api:'collie/bearded',
+   stats:{Loyalty:88,Intelligence:80,Energy:85,Fluffiness:85,Trainability:82,Friendliness:88},
+   fact:'Called "Beardies," these shaggy herding dogs were bred to work the Scottish Highlands in any weather.'},
+  {id:10, name:'Bermaise',         group:'Working',      api:'mountain/bernese',
+   stats:{Loyalty:90,Intelligence:80,Energy:65,Fluffiness:92,Trainability:78,Friendliness:92},
+   fact:'Bernese Mountain Dogs were Swiss farm dogs who pulled carts and drove cattle across steep Alpine slopes.'},
+  {id:11, name:'Bichon Frise',     group:'Non-Sporting', api:'frise/bichon',
+   stats:{Loyalty:88,Intelligence:72,Energy:65,Fluffiness:95,Trainability:78,Friendliness:92},
+   fact:'Their name means "curly lap dog" in French. The Bichon was a favourite of French royalty for centuries.'},
+  {id:12, name:'Blenheim',         group:'Toy',          api:'spaniel/blenheim',
+   stats:{Loyalty:90,Intelligence:75,Energy:60,Fluffiness:80,Trainability:80,Friendliness:95},
+   fact:'A chestnut-and-white Cavalier King Charles Spaniel coloring, named after Blenheim Palace.'},
+  {id:13, name:'Bloodhound',       group:'Hound',        api:'hound/blood',
+   stats:{Loyalty:78,Intelligence:65,Energy:60,Fluffiness:45,Trainability:50,Friendliness:80},
+   fact:'A Bloodhound\'s tracking is legally admissible in court. They can follow a trail over 130 miles long.'},
+  {id:14, name:'Bluetick',         group:'Hound',        api:'bluetick',
+   stats:{Loyalty:82,Intelligence:68,Energy:80,Fluffiness:40,Trainability:60,Friendliness:78},
+   fact:'A Southern coonhound with a distinctive blue-ticked coat — every dog\'s pattern is completely unique.'},
+  {id:15, name:'Border Collie',    group:'Herding',      api:'collie/border',
+   stats:{Loyalty:90,Intelligence:100,Energy:95,Fluffiness:65,Trainability:98,Friendliness:80},
+   fact:'Widely regarded as the most intelligent dog breed. Border Collies can learn a command in under 5 repetitions.'},
+  {id:16, name:'Borzoi',           group:'Hound',        api:'borzoi',
+   stats:{Loyalty:72,Intelligence:68,Energy:80,Fluffiness:85,Trainability:55,Friendliness:62},
+   fact:'Russian aristocratic sighthounds once used in wolf hunts by the Tsar\'s court. They reach 37 mph.'},
+  {id:17, name:'Boston Terrier',   group:'Non-Sporting', api:'bulldog/boston',
+   stats:{Loyalty:88,Intelligence:78,Energy:72,Fluffiness:15,Trainability:80,Friendliness:92},
+   fact:'The first dog breed developed in the United States — recognized by the AKC in 1893.'},
+  {id:18, name:'Boxer',            group:'Working',      api:'boxer',
+   stats:{Loyalty:92,Intelligence:78,Energy:85,Fluffiness:15,Trainability:78,Friendliness:88},
+   fact:'Boxers got their name from their habit of standing on hind legs and "boxing" with their front paws during play.'},
+  {id:19, name:'Bull Mastiff',     group:'Working',      api:'mastiff/bull',
+   stats:{Loyalty:92,Intelligence:75,Energy:55,Fluffiness:25,Trainability:70,Friendliness:75},
+   fact:'Bred by English gamekeepers in the 1800s to catch poachers — 60% Mastiff, 40% Bulldog, 100% effective.'},
+  {id:20, name:'Bull Terrier',     group:'Terrier',      api:'bullterrier/staffordshire',
+   stats:{Loyalty:85,Intelligence:68,Energy:88,Fluffiness:15,Trainability:62,Friendliness:78},
+   fact:'The only breed with a completely egg-shaped skull — a profile found nowhere else across 300+ recognized breeds.'},
+  {id:21, name:'Bulldog',          group:'Non-Sporting', api:'bulldog/english',
+   stats:{Loyalty:85,Intelligence:65,Energy:35,Fluffiness:20,Trainability:62,Friendliness:90},
+   fact:'Despite the fierce look, Bulldogs are among the gentlest and most patient breeds ever developed.'},
+  {id:22, name:'Cairn',            group:'Terrier',      api:'cairn',
+   stats:{Loyalty:80,Intelligence:72,Energy:80,Fluffiness:55,Trainability:65,Friendliness:82},
+   fact:'Toto from The Wizard of Oz was a Cairn Terrier. Originally bred to hunt rodents in Scottish cairns.'},
+  {id:23, name:'Chihuahua',        group:'Toy',          api:'chihuahua',
+   stats:{Loyalty:90,Intelligence:72,Energy:70,Fluffiness:30,Trainability:62,Friendliness:65},
+   fact:'The world\'s smallest dog breed — present in Mexico since at least the 9th century.'},
+  {id:24, name:'Chinese Crested',  group:'Toy',          api:null,
+   stats:{Loyalty:88,Intelligence:70,Energy:65,Fluffiness:25,Trainability:72,Friendliness:85},
+   fact:'Comes in Hairless and Powderpuff varieties. The Hairless version has skin that feels surprisingly warm.'},
+  {id:25, name:'Chow',             group:'Non-Sporting', api:'chow',
+   stats:{Loyalty:75,Intelligence:72,Energy:55,Fluffiness:85,Trainability:58,Friendliness:55},
+   fact:'Chow Chows have a blue-black tongue — a trait shared with only one other breed out of hundreds worldwide.'},
+  {id:26, name:'Clumber',          group:'Sporting',     api:'clumber',
+   stats:{Loyalty:85,Intelligence:72,Energy:50,Fluffiness:65,Trainability:72,Friendliness:85},
+   fact:'The heaviest spaniel breed, developed for French and English nobility. Calm and quietly dignified.'},
+  {id:27, name:'Cockapoo',         group:'Hybrid',       api:'cockapoo',
+   stats:{Loyalty:92,Intelligence:82,Energy:75,Fluffiness:80,Trainability:88,Friendliness:95},
+   fact:'One of the earliest "designer dogs" — a Cocker Spaniel + Poodle cross developed in the 1960s.'},
+  {id:28, name:'Cocker',           group:'Sporting',     api:'spaniel/cocker',
+   stats:{Loyalty:90,Intelligence:78,Energy:75,Fluffiness:70,Trainability:82,Friendliness:90},
+   fact:'The American Cocker Spaniel was the most popular breed in the US for the entire decade of the 1940s.'},
+  {id:29, name:'Collie',           group:'Herding',      api:'collie/border',
+   stats:{Loyalty:90,Intelligence:88,Energy:75,Fluffiness:80,Trainability:90,Friendliness:90},
+   fact:'Lassie made this breed a global icon. Collies have been documented navigating hundreds of miles to return home.'},
+  {id:30, name:'Corgi',            group:'Herding',      api:'corgi/pembroke',
+   stats:{Loyalty:88,Intelligence:85,Energy:78,Fluffiness:70,Trainability:88,Friendliness:90},
+   fact:'Queen Elizabeth II owned more than 30 Corgis. Welsh legend says they were the mounts of fairy warriors.'},
+  {id:31, name:'Dalmation',        group:'Non-Sporting', api:'dalmatian',
+   stats:{Loyalty:82,Intelligence:72,Energy:88,Fluffiness:15,Trainability:72,Friendliness:85},
+   fact:'Dalmatians are born completely white — their famous spots develop over the first few weeks of life.'},
+  {id:32, name:'Dhole',            group:'Wild',         api:'dhole',
+   stats:{Loyalty:75,Intelligence:70,Energy:95,Fluffiness:35,Trainability:20,Friendliness:30},
+   fact:'A wild canid from Asia that hunts in packs using a distinctive whistle. Not a domestic dog.'},
+  {id:33, name:'Dingo',            group:'Wild',         api:'dingo',
+   stats:{Loyalty:60,Intelligence:68,Energy:90,Fluffiness:30,Trainability:20,Friendliness:35},
+   fact:'Australia\'s semi-wild dog has lived on the continent for around 3,500 years.'},
+  {id:34, name:'Doberman',         group:'Working',      api:'doberman',
+   stats:{Loyalty:95,Intelligence:88,Energy:85,Fluffiness:10,Trainability:92,Friendliness:75},
+   fact:'Created by Karl Dobermann, a German tax collector who needed a formidable companion for dangerous rounds.'},
+  {id:35, name:'Elk Hound',        group:'Hound',        api:'elkhound/norwegian',
+   stats:{Loyalty:82,Intelligence:72,Energy:80,Fluffiness:70,Trainability:72,Friendliness:80},
+   fact:'One of the most ancient Scandinavian breeds, found in Viking burial mounds thousands of years old.'},
+  {id:36, name:'French Bulldog',   group:'Non-Sporting', api:'bulldog/french',
+   stats:{Loyalty:88,Intelligence:72,Energy:55,Fluffiness:15,Trainability:78,Friendliness:92},
+   fact:'As of 2023, the French Bulldog is the #1 most popular dog in the US — ending Labrador\'s 31-year reign.'},
+  {id:37, name:'German Sheperd',   group:'Herding',      api:'germanshepherd',
+   stats:{Loyalty:95,Intelligence:92,Energy:82,Fluffiness:55,Trainability:96,Friendliness:78},
+   fact:'The most versatile working breed in history — police K-9, military, guide dog, search and rescue.'},
+  {id:38, name:'Golden Retriever', group:'Sporting',     api:'retriever/golden',
+   stats:{Loyalty:95,Intelligence:88,Energy:80,Fluffiness:80,Trainability:92,Friendliness:99},
+   fact:'Developed in the Scottish Highlands in the 1860s to retrieve waterfowl. Consistently a top-3 breed worldwide.'},
+  {id:39, name:'Great Dane',       group:'Working',      api:'dane/great',
+   stats:{Loyalty:85,Intelligence:72,Energy:60,Fluffiness:15,Trainability:72,Friendliness:88},
+   fact:'Zeus, a Great Dane from Michigan, was certified as the world\'s tallest dog at 44 inches at the shoulder.'},
+  {id:40, name:'Great Perenees',   group:'Working',      api:'pyrenees/great',
+   stats:{Loyalty:85,Intelligence:72,Energy:60,Fluffiness:98,Trainability:68,Friendliness:82},
+   fact:'Bred for freezing mountain conditions. Great Pyrenees have double dewclaws on hind feet for grip on snow.'},
+  {id:41, name:'Greyhound',        group:'Hound',        api:'greyhound',
+   stats:{Loyalty:80,Intelligence:70,Energy:90,Fluffiness:15,Trainability:68,Friendliness:78},
+   fact:'The fastest dog breed at 45 mph — yet famous for being "40 mph couch potatoes" at home.'},
+  {id:42, name:'Groenendael',      group:'Herding',      api:'groenendael',
+   stats:{Loyalty:88,Intelligence:85,Energy:82,Fluffiness:75,Trainability:88,Friendliness:78},
+   fact:'The all-black Belgian Shepherd, named after a village near Brussels. Elite herding and protection dogs.'},
+  {id:43, name:'Irish Spaniel',    group:'Sporting',     api:'spaniel/irish',
+   stats:{Loyalty:88,Intelligence:78,Energy:85,Fluffiness:60,Trainability:78,Friendliness:92},
+   fact:'Nicknamed the "Clown of the Spaniel Family." Natural-born swimmers with a reliably goofy personality.'},
+  {id:44, name:'Irish Wolfhound',  group:'Hound',        api:'wolfhound/irish',
+   stats:{Loyalty:85,Intelligence:70,Energy:65,Fluffiness:60,Trainability:70,Friendliness:90},
+   fact:'The tallest dog breed by standard height. Despite their size, they are exceptionally gentle.'},
+  {id:45, name:'Japanese Spaniel', group:'Toy',          api:'spaniel/japanese',
+   stats:{Loyalty:88,Intelligence:72,Energy:55,Fluffiness:70,Trainability:78,Friendliness:88},
+   fact:'The Japanese Chin was an imperial court companion — ownership was restricted to royalty for centuries.'},
+  {id:46, name:'Komondor',         group:'Working',      api:'komondor',
+   stats:{Loyalty:88,Intelligence:70,Energy:65,Fluffiness:100,Trainability:65,Friendliness:70},
+   fact:'The Komondor\'s corded coat can develop over 1,900 individual cords and takes two full years to form.'},
+  {id:47, name:'Labradoodle',      group:'Hybrid',       api:'labradoodle',
+   stats:{Loyalty:92,Intelligence:85,Energy:82,Fluffiness:80,Trainability:92,Friendliness:98},
+   fact:'First bred in 1989 in Australia as a hypoallergenic guide dog for a blind woman whose husband had allergies.'},
+  {id:48, name:'Labrador',         group:'Sporting',     api:'labrador',
+   stats:{Loyalty:95,Intelligence:85,Energy:85,Fluffiness:45,Trainability:95,Friendliness:99},
+   fact:'The Labrador Retriever held the #1 most popular breed spot in the US for 31 consecutive years.'},
+  {id:49, name:'Lhasa',            group:'Non-Sporting', api:'lhasa',
+   stats:{Loyalty:80,Intelligence:70,Energy:55,Fluffiness:88,Trainability:65,Friendliness:72},
+   fact:'Sacred temple dogs of Tibet. The Lhasa Apso was never sold — only given as a gift.'},
+  {id:50, name:'Malinois',         group:'Herding',      api:'malinois',
+   stats:{Loyalty:92,Intelligence:92,Energy:98,Fluffiness:35,Trainability:96,Friendliness:70},
+   fact:'The breed of choice for US Navy SEALs. Cairo, on the 2011 Bin Laden raid, was a Malinois.'},
+  {id:51, name:'Maltese',          group:'Toy',          api:'maltese',
+   stats:{Loyalty:88,Intelligence:72,Energy:55,Fluffiness:92,Trainability:75,Friendliness:88},
+   fact:'Ancient Greeks built tombs for their Maltese dogs over 2,000 years ago.'},
+  {id:52, name:'Mex Hairless',     group:'Non-Sporting', api:'mexicanhairless',
+   stats:{Loyalty:82,Intelligence:75,Energy:65,Fluffiness:5,Trainability:72,Friendliness:78},
+   fact:'The Xoloitzcuintli is among the rarest breeds and was sacred to the Aztecs.'},
+  {id:53, name:'Newfoundland',     group:'Working',      api:'newfoundland',
+   stats:{Loyalty:90,Intelligence:78,Energy:60,Fluffiness:95,Trainability:82,Friendliness:95},
+   fact:'Newfoundlands have webbed feet and a water-resistant coat. Documented life rescues by this breed number in the hundreds.'},
+  {id:54, name:'Pekinese',         group:'Toy',          api:'pekinese',
+   stats:{Loyalty:75,Intelligence:68,Energy:40,Fluffiness:88,Trainability:58,Friendliness:70},
+   fact:'Bred exclusively for Chinese emperors. Under the Tang Dynasty, stealing one was punishable by death.'},
+  {id:55, name:'Pit Bull',         group:'Terrier',      api:'pitbull',
+   stats:{Loyalty:96,Intelligence:78,Energy:88,Fluffiness:20,Trainability:82,Friendliness:90},
+   fact:'When properly raised, Pit Bulls are among the most loyal and human-devoted breeds — historically called "nanny dogs."'},
+  {id:56, name:'Pomeranian',       group:'Toy',          api:'pomeranian',
+   stats:{Loyalty:85,Intelligence:72,Energy:75,Fluffiness:95,Trainability:72,Friendliness:80},
+   fact:'Queen Victoria\'s Pomeranian sparked a European fashion for miniature Poms, dramatically shrinking the breed\'s size.'},
+  {id:57, name:'Poodle',           group:'Non-Sporting', api:'poodle',
+   stats:{Loyalty:88,Intelligence:97,Energy:72,Fluffiness:90,Trainability:96,Friendliness:88},
+   fact:'The classic show clip was functional — removing fur from joints during cold-water retrieves while keeping organs warm.'},
+  {id:58, name:'Pug',              group:'Toy',          api:'pug',
+   stats:{Loyalty:88,Intelligence:65,Energy:50,Fluffiness:20,Trainability:60,Friendliness:95},
+   fact:'The Pug\'s motto: "multum in parvo" — a great deal in a small space. Imperial Chinese companions since the 10th century.'},
+  {id:59, name:'Rhodesian',        group:'Hound',        api:'ridgeback/rhodesian',
+   stats:{Loyalty:88,Intelligence:78,Energy:85,Fluffiness:25,Trainability:72,Friendliness:78},
+   fact:'Bred to find lions and hold them at bay — not fight them — while waiting for the hunter to arrive.'},
+  {id:60, name:'Rottweiler',       group:'Working',      api:'rottweiler',
+   stats:{Loyalty:95,Intelligence:82,Energy:75,Fluffiness:20,Trainability:85,Friendliness:72},
+   fact:'Descendant of ancient Roman drover dogs that traveled with the legions across Europe. One of the oldest lineages known.'},
+  {id:61, name:'Saint Bernard',    group:'Working',      api:'stbernard',
+   stats:{Loyalty:88,Intelligence:72,Energy:50,Fluffiness:88,Trainability:78,Friendliness:92},
+   fact:'Barry der Menschenretter saved over 40 lives in the Swiss Alps. A statue in Bern commemorates him.'},
+  {id:62, name:'Schnauzer',        group:'Terrier',      api:'schnauzer',
+   stats:{Loyalty:85,Intelligence:82,Energy:78,Fluffiness:55,Trainability:82,Friendliness:82},
+   fact:'Those distinctive beard and eyebrows were originally protective — shielding the face when pursuing prey through brush.'},
+  {id:63, name:'Scotch Terrier',   group:'Terrier',      api:'terrier/scottish',
+   stats:{Loyalty:82,Intelligence:72,Energy:70,Fluffiness:60,Trainability:65,Friendliness:72},
+   fact:'The most common presidential dog in US history — in the White House under FDR, Eisenhower, and George W. Bush.'},
+  {id:64, name:'Shar_Pei',         group:'Non-Sporting', api:null,
+   stats:{Loyalty:80,Intelligence:68,Energy:55,Fluffiness:60,Trainability:65,Friendliness:65},
+   fact:'Those dramatic wrinkles were deliberate — excess loose skin made the dog significantly harder to grip in a fight.'},
+  {id:65, name:'Shiba Inu',        group:'Non-Sporting', api:'shiba',
+   stats:{Loyalty:75,Intelligence:78,Energy:72,Fluffiness:60,Trainability:62,Friendliness:68},
+   fact:'Japan\'s most popular dog breed and the original internet meme dog — Kabosu the "Doge" is a Shiba Inu.'},
+  {id:66, name:'Shih-Tzu',         group:'Toy',          api:'shihtzu',
+   stats:{Loyalty:85,Intelligence:68,Energy:50,Fluffiness:95,Trainability:68,Friendliness:88},
+   fact:'The name means "lion dog" in Chinese. Bred to resemble Buddhist lions, kept exclusively by Chinese royalty.'},
+  {id:67, name:'Siberian Husky',   group:'Working',      api:'husky',
+   stats:{Loyalty:82,Intelligence:75,Energy:98,Fluffiness:88,Trainability:68,Friendliness:80},
+   fact:'Huskies can run 100+ miles a day in freezing temps — a metabolic efficiency science still can\'t fully explain.'},
+  {id:68, name:'Vizsla',           group:'Sporting',     api:'vizsla',
+   stats:{Loyalty:92,Intelligence:85,Energy:90,Fluffiness:25,Trainability:88,Friendliness:90},
+   fact:'The only breed where coat and eye color genetically match — both a distinctive golden rust.'},
+  {id:69, name:'Yorkie',           group:'Terrier',      api:'terrier/yorkshire',
+   stats:{Loyalty:82,Intelligence:72,Energy:72,Fluffiness:88,Trainability:68,Friendliness:80},
+   fact:'Yorkshire Terriers were bred as working ratters in 19th-century English textile mills.'},
+];
+
+const STAT_COLORS = {
+  Loyalty:'#ef4444',Intelligence:'#38bdf8',Energy:'#fbbf24',
+  Fluffiness:'#a78bfa',Trainability:'#34d399',Friendliness:'#fb923c',
+};
+const TYPE_COLORS = {
+  Herding:'#065f46',Hound:'#92400e',Sporting:'#1e3a8a',Terrier:'#7f1d1d',
+  Toy:'#831843',Working:'#4c1d95','Non-Sporting':'#1e293b',Hybrid:'#164e63',Wild:'#422006'
+};
+const byName = {};
+BREEDS.forEach(b => byName[b.name] = b);
+const imgCache = {};
+function pad(n){return String(n).padStart(3,'0');}
+
+/* ═══════ TABS ═══════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(btn.dataset.tab+'-view').classList.add('active');
+  });
+});
+
+/* ═══════ LIBRARY ═══════ */
+const breedListEl = document.getElementById('breed-list');
+const listEmpty   = document.getElementById('list-empty');
+let selectedBreed = BREEDS[0];
+
+BREEDS.forEach(b => {
+  const row = document.createElement('div');
+  row.className='breed-row';
+  row.dataset.s=b.name.toLowerCase();
+  row.dataset.g=b.group;
+  row.dataset.n=b.name;
+  row.innerHTML=`
+    <span class="breed-row-num">#${pad(b.id)}</span>
+    <img class="breed-row-img" alt="${b.name}" />
+    <span class="breed-row-name">${b.name}</span>
+    <span class="type-badge t-${b.group}">${b.group}</span>`;
+  row.addEventListener('click',()=>selectBreed(b,row));
+  breedListEl.appendChild(row);
+});
+breedListEl.appendChild(listEmpty);
+
+async function loadRowImg(row) {
+  const b=byName[row.dataset.n], img=row.querySelector('.breed-row-img');
+  if(!b||!img||img.classList.contains('loaded')) return;
+  let url=imgCache[b.name];
+  if(!url){
+    const ep=b.api?`https://dog.ceo/api/breed/${b.api}/images/random`:'https://dog.ceo/api/breeds/image/random';
+    try{const d=await(await fetch(ep)).json();url=d.status==='success'?d.message:null;}catch{}
+    if(!url){try{url=(await(await fetch('https://dog.ceo/api/breeds/image/random')).json()).message;}catch{}}
+    if(url)imgCache[b.name]=url;
+  }
+  if(url){img.onload=()=>img.classList.add('loaded');img.src=url;}
+}
+const rowObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){loadRowImg(e.target);rowObs.unobserve(e.target);}});
+},{rootMargin:'120px'});
+document.querySelectorAll('.breed-row').forEach(r=>rowObs.observe(r));
+
+function selectBreed(breed, rowEl) {
+  document.querySelectorAll('.breed-row').forEach(r=>r.classList.remove('selected'));
+  if(rowEl) rowEl.classList.add('selected');
+  selectedBreed=breed;
+
+  const info=document.getElementById('lib-info');
+  info.classList.add('switching');
+
+  setTimeout(()=>{
+    document.getElementById('lib-num').textContent='#'+pad(breed.id);
+    document.getElementById('lib-name').textContent=breed.name;
+    const badge=document.getElementById('lib-badge');
+    badge.textContent=breed.group;
+    badge.className='type-badge t-'+breed.group;
+    document.getElementById('lib-fact').textContent=breed.fact;
+
+    const statsEl=document.getElementById('lib-stats');
+    statsEl.innerHTML='';
+    Object.entries(breed.stats).forEach(([k,v])=>{
+      statsEl.innerHTML+=`<div class="lib-stat-row">
+        <div class="lib-stat-lbl">${k}</div>
+        <div class="lib-stat-track"><div class="lib-stat-fill" data-v="${v}" style="background:${STAT_COLORS[k]}"></div></div>
+      </div>`;
+    });
+
+    const hero=document.getElementById('lib-hero');
+    const ph=document.getElementById('lib-placeholder');
+    hero.style.opacity='0';
+    ph.style.display='flex';
+    const url=imgCache[breed.name];
+    function setHero(src){
+      hero.src=src;
+      hero.onload=()=>{hero.style.opacity='1';ph.style.display='none';};
+    }
+    if(url){ setHero(url); }
+    else if(breed.api){
+      fetch(`https://dog.ceo/api/breed/${breed.api}/images/random`)
+        .then(r=>r.json()).then(d=>{
+          if(d.status==='success'){imgCache[breed.name]=d.message;setHero(d.message);}
+        }).catch(()=>{});
+    }
+
+    info.classList.remove('switching');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      statsEl.querySelectorAll('.lib-stat-fill').forEach(el=>{el.style.width=el.dataset.v+'%';});
+    }));
+  },210);
+}
+
+selectBreed(BREEDS[0], document.querySelector('.breed-row'));
+
+/* Filter/search */
+const searchInput=document.getElementById('search-input');
+const visibleCount=document.getElementById('visible-count');
+function applyFilters(){
+  const q=searchInput.value.toLowerCase().trim();
+  const g=document.querySelector('.filter-btn.active')?.dataset.group??'All';
+  let n=0;
+  document.querySelectorAll('.breed-row').forEach(r=>{
+    const ok=(!q||r.dataset.s.includes(q))&&(g==='All'||r.dataset.g===g);
+    r.style.display=ok?'':'none';
+    if(ok)n++;
+  });
+  visibleCount.textContent=n;
+  listEmpty.style.display=n===0?'block':'none';
+}
+searchInput.addEventListener('input',applyFilters);
+document.getElementById('filter-row').addEventListener('click',e=>{
+  const btn=e.target.closest('.filter-btn');
+  if(!btn)return;
+  document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active');b.style.background=b.style.color='';});
+  btn.classList.add('active');
+  const col=TYPE_COLORS[btn.dataset.group];
+  if(col){btn.style.background=col;btn.style.color='#fff';}
+  applyFilters();
+});
+
+/* ═══════ SCAN — result panel ═══════ */
+function showScanResult(breed, confidence, inferenceMs, preds) {
+  document.getElementById('result-empty').style.display='none';
+  const card=document.getElementById('result-card');
+  card.style.display='block';
+  card.style.animation='none';card.offsetHeight;card.style.animation='';
+
+  document.getElementById('result-num').textContent='#'+pad(breed.id);
+  document.getElementById('result-name').textContent=breed.name;
+
+  const badge=document.getElementById('result-badge');
+  badge.textContent=breed.group;badge.className='type-badge t-'+breed.group;
+
+  const conf=document.getElementById('result-conf');
+  conf.textContent=confidence+'% confidence';
+  conf.className='result-conf '+(confidence>=90?'conf-high':confidence>=70?'conf-mid':'conf-low');
+
+  const speed=document.getElementById('result-speed');
+  if(inferenceMs!=null){speed.textContent=inferenceMs+'ms · MobileNetV2';speed.style.display='';}
+  else{speed.style.display='none';}
+
+  document.getElementById('result-fact').textContent=breed.fact;
+
+  const srEl=document.getElementById('result-stat-rows');
+  srEl.innerHTML='';
+  Object.entries(breed.stats).forEach(([k,v])=>{
+    srEl.innerHTML+=`<div class="rs-row">
+      <div class="rs-label">${k}</div>
+      <div class="rs-track"><div class="rs-fill" data-v="${v}" style="background:${STAT_COLORS[k]}"></div></div>
+      <div class="rs-val">${v}</div></div>`;
+  });
+
+  const altsEl=document.getElementById('result-alts');
+  const altsListEl=document.getElementById('result-alts-list');
+  altsListEl.innerHTML='';
+  if(preds&&preds.length>1){
+    altsEl.style.display='';
+    preds.slice(1).forEach((p,i)=>{
+      altsListEl.innerHTML+=`<div class="alt-row">
+        <div class="alt-rank">${i+2}</div>
+        <div class="alt-name">${p.breed}</div>
+        <div class="alt-track"><div class="alt-fill" data-w="${p.confidence}"></div></div>
+        <div class="alt-pct">${p.confidence}%</div></div>`;
+    });
+  }else{altsEl.style.display='none';}
+
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    srEl.querySelectorAll('.rs-fill').forEach(el=>{el.style.width=el.dataset.v+'%';});
+    altsListEl.querySelectorAll('.alt-fill').forEach(el=>{el.style.width=el.dataset.w+'%';});
+  }));
+}
+
+/* ═══════ SCAN — upload ═══════ */
+const fileInput=document.getElementById('file-input');
+const uploadZone=document.getElementById('upload-zone');
+const previewWrap=document.getElementById('preview-wrap');
+const preview=document.getElementById('preview');
+const previewName=document.getElementById('preview-name');
+const scanBtn=document.getElementById('scan-btn');
+const scanError=document.getElementById('scan-error');
+let selectedFile=null, previewURL=null;
+
+uploadZone.addEventListener('click',e=>{if(e.target!==fileInput)fileInput.click();});
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop',e=>{
+  e.preventDefault();uploadZone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))handleFile(f);
+});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
+
+function handleFile(f) {
+  selectedFile=f;
+  if(previewURL)URL.revokeObjectURL(previewURL);
+  previewURL=URL.createObjectURL(f);
+  preview.src=previewURL;
+  previewName.textContent=f.name;
+  preview.classList.add('silhouette');
+  document.getElementById('whos-overlay').classList.add('show');
+  uploadZone.style.display='none';
+  previewWrap.style.display='flex';
+  scanBtn.style.display='block';
+  scanBtn.textContent='Reveal Breed';
+  scanError.style.display='none';
+}
+
+function resetScan() {
+  selectedFile=null;fileInput.value='';
+  preview.classList.remove('silhouette');
+  document.getElementById('whos-overlay').classList.remove('show');
+  uploadZone.style.display='';
+  previewWrap.style.display='none';
+  scanBtn.style.display='none';
+  scanError.style.display='none';
+  document.getElementById('scan-overlay').style.display='none';
+  document.getElementById('result-card').style.display='none';
+  document.getElementById('result-empty').style.display='flex';
+}
+document.getElementById('change-photo').addEventListener('click',resetScan);
+document.getElementById('result-again').addEventListener('click',resetScan);
+
+/* Progress */
+const progressBar=document.getElementById('progress-bar');
+function startProgress(){
+  progressBar.style.transition='none';progressBar.style.width='0%';progressBar.style.opacity='1';
+  requestAnimationFrame(()=>{progressBar.style.transition='width 2.8s cubic-bezier(.05,0,.2,1)';progressBar.style.width='70%';});
+}
+function finishProgress(){
+  progressBar.style.transition='width .15s ease';progressBar.style.width='100%';
+  setTimeout(()=>{progressBar.style.transition='opacity .4s ease';progressBar.style.opacity='0';
+    setTimeout(()=>{progressBar.style.width='0%';},450);},180);
+}
+
+/* Cycling messages */
+const SCAN_MSGS=[
+  'Analyzing breed signatures\u00a0\u00a0\u2026',
+  'Running neural network\u00a0\u00a0\u2026',
+  'Matching feature vectors\u00a0\u00a0\u2026',
+  'Consulting 69 breed profiles\u00a0\u00a0\u2026',
+  'Calibrating confidence scores\u00a0\u00a0\u2026',
+];
+let msgInterval=null;
+
+scanBtn.addEventListener('click',async()=>{
+  if(!selectedFile)return;
+  const scanOverlay=document.getElementById('scan-overlay');
+  const scanLabel=scanOverlay.querySelector('.scan-label');
+  scanBtn.disabled=true;
+  scanOverlay.style.display='flex';
+  scanError.style.display='none';
+
+  let msgIdx=0;
+  scanLabel.textContent=SCAN_MSGS[0];
+  msgInterval=setInterval(()=>{msgIdx=(msgIdx+1)%SCAN_MSGS.length;scanLabel.textContent=SCAN_MSGS[msgIdx];},900);
+  startProgress();
+
+  const fd=new FormData();fd.append('file',selectedFile);
+  try {
+    const res=await fetch('/predict',{method:'POST',body:fd});
+    if(!res.ok)throw new Error(`Server error ${res.status}`);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    const preds=data.predictions,best=preds[0];
+    const breed=byName[best.breed]||{
+      id:0,name:best.breed,group:'Unknown',api:null,
+      stats:{Loyalty:75,Intelligence:75,Energy:75,Fluffiness:50,Trainability:75,Friendliness:75},
+      fact:'A wonderful dog breed identified by our neural network.'
+    };
+
+    preview.classList.remove('silhouette');
+    document.getElementById('whos-overlay').classList.remove('show');
+    finishProgress();
+
+    const flashEl=document.getElementById('flash-overlay');
+    flashEl.classList.add('flash');
+    setTimeout(()=>flashEl.classList.remove('flash'),700);
+    setTimeout(()=>{
+      showScanResult(breed,best.confidence,data.inference_ms,preds);
+      spawnSparks();
+    },180);
+  } catch(err) {
+    scanError.textContent=`Error: ${err.message||'Please try again with a clearer photo.'}`;
+    scanError.style.display='block';
+    finishProgress();
+  } finally {
+    clearInterval(msgInterval);
+    document.getElementById('scan-overlay').style.display='none';
+    scanBtn.disabled=false;
+  }
+});
+
+/* Sparks */
+function spawnSparks(){
+  const cols=['#dc2626','#fbbf24','#a78bfa','#34d399','#38bdf8','#fb923c'];
+  for(let i=0;i<40;i++){
+    const el=document.createElement('div');el.className='spark';
+    const sz=4+Math.random()*6,dur=1.4+Math.random()*2;
+    el.style.cssText=`left:${Math.random()*100}vw;top:-8px;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-delay:${Math.random()*.4}s;animation-duration:${dur}s`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),(dur+.6)*1000);
+  }
+}
+
+/* Paste */
+document.addEventListener('paste',e=>{
+  const items=e.clipboardData?.items;if(!items)return;
+  for(const item of items){
+    if(item.type.startsWith('image/')){
+      const file=item.getAsFile();if(!file)break;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('[data-tab="scan"]').classList.add('active');
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById('scan-view').classList.add('active');
+      handleFile(file);break;
+    }
+  }
+});
+
+/* Keyboard */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.target.matches('input,textarea,button')){
+    const btn=document.getElementById('scan-btn');
+    if(btn.style.display!=='none'&&!btn.disabled)btn.click();
+  }
+});
+
+/* Count-up for stat strip */
+(function(){
+  const nums=document.querySelectorAll('.sn');
+  const targets=[
+    {to:69,    fmt:v=>Math.round(v).toString()},
+    {to:95.75, fmt:v=>v.toFixed(2)+'%'},
+    {to:8.6,   fmt:v=>v.toFixed(1)+'K'},
+  ];
+  let done=false;
+  function run(){
+    if(done)return;done=true;
+    const t0=performance.now(),dur=1100;
+    function tick(now){
+      const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);
+      nums.forEach((el,i)=>{if(targets[i])el.textContent=targets[i].fmt(ease*targets[i].to);});
+      if(p<1)requestAnimationFrame(tick);
+      else nums.forEach((el,i)=>{if(targets[i])el.textContent=targets[i].fmt(targets[i].to);});
+    }
+    requestAnimationFrame(tick);
+  }
+  const obs=new IntersectionObserver(entries=>{
+    if(entries.some(e=>e.isIntersecting)){obs.disconnect();run();}
+  },{threshold:0.5});
+  const strip=document.querySelector('.scan-stats');
+  if(strip)obs.observe(strip);
+})();
+</script>
+</body>
+</html>

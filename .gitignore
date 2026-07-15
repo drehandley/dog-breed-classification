@@ -1,0 +1,36 @@
+# Dataset image folders (too large for git)
+train/
+test/
+valid/
+data/
+
+# Raw/binary data
+dogs.csv
+dog_breeds_metadata.db
+*.db
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.env
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# AI tooling (internal config)
+CLAUDE.md
+
+# Personal files unrelated to project
+banner.png
+profile-README.md

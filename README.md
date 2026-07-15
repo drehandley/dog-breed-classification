@@ -1,120 +1,137 @@
-# Dog Breed Classifier — Pluto's Repawsitory
+# Pluto's Repawsitory
 
-A convolutional neural network that identifies dog breeds from photos. Built as a capstone project for The Knowledge House Data Science Fellowship, Phase 3.
+**An app that identifies dog breeds from a single photo to support automated intake processing at animal shelters.**
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
-![Google Colab](https://img.shields.io/badge/Colab-F9AB00?style=flat-square&logo=googlecolab&logoColor=white)
+Built as a capstone project for The Knowledge House Data Science Fellowship, Phase 3 — full pipeline from raw data to a deployed web application.
 
----
-
-## The Problem
-
-Animal shelters manually identify dog breeds on intake — a process that's slow, inconsistent, and error-prone. Misidentified breeds affect adoption listings and housing eligibility for adopters. We built a model that gives shelters an automated first pass from a single photo.
-
-## Pipeline Overview
-
-**Raw data → SQL database → preprocessing → training → app (Sprint 4)**
-
-1. **EDA** — explored class distribution, image dimensions, and class imbalance across 69 breeds
-2. **SQL database** — built a SQLite metadata store tracking file path, label, split, dimensions, and quality flags for all 8,692 images
-3. **Preprocessing** — custom PyTorch Dataset class, ImageNet normalization, augmentation on train only (flip, rotation, color jitter), WeightedRandomSampler for class imbalance
-4. **Training** — pretrained ResNet50 and MobileNetV2, base layers frozen, classification head replaced with Linear(2048, 69) and Linear(1280, 69). Trained with CrossEntropyLoss + Adam
-5. **App** — FastAPI backend + demo interface, Sprint 4
-
-The inference pipeline applies the same resize (224×224) and normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) as training — so the model never sees a distribution it wasn't trained on.
+[![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.2-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://dog-breed-classification-wtir.onrender.com)
 
 ---
 
-## Demo
+## Live Demo
 
-**Live:** https://dog-breed-classification-wtir.onrender.com
+**[https://dog-breed-classification-wtir.onrender.com](https://dog-breed-classification-wtir.onrender.com)**
 
-Upload any dog photo → the model returns the top 3 predicted breeds with confidence scores. The interface includes a breed library of all 69 classes with real photos, stat breakdowns, and group filters.
+![App Preview](outputs/app_preview.png)
 
-**Run locally:**
-```bash
-cd app && uvicorn app:app --reload --port 8000
-# open http://localhost:8000
-```
+Upload any dog photo → the model returns the top 3 predicted breeds with confidence scores in under a second. Includes a full breed library of all 69 classes with real photos, group filters, and searchable by name.
 
 ---
 
-## Results — Model Comparison
+## Table of Contents
 
-We trained two models and compared performance on 682 held-out test images across 69 breeds.
+- [Problem Statement](#problem-statement)
+- [Dataset](#dataset)
+- [Pipeline Overview](#pipeline-overview)
+- [Results](#results)
+- [Tech Stack](#tech-stack)
+- [Repo Structure](#repo-structure)
+- [Setup](#setup)
+- [Team](#team)
+- [Challenges](#challenges)
+- [What's Next](#whats-next)
+- [Acknowledgments](#acknowledgments)
 
-### ResNet50 — Google Colab T4 GPU
+---
 
-| Metric | Score |
-|--------|-------|
-| Accuracy | 97.51% |
-| Precision | 97.70% |
-| Recall | 97.51% |
-| F1 Score | 97.52% |
+## Problem Statement
 
-**Loss Curves — Both Models**
+Animal shelters manually identify dog breeds on intake — a process that is slow, inconsistent, and prone to error. Misidentified breeds affect adoption listings, restrict placement options, and can affect housing eligibility for adopters in breed-restricted buildings.
 
-![Loss Curves](outputs/ozor_loss_curves.png)
-
-Both models trained with a two-phase strategy: frozen backbone (15 epochs) then full fine-tuning (15 more). ResNet50 converges faster and reaches lower loss overall. MobileNetV2 takes longer to converge but stays tighter across Phase 2 with less overfitting.
-
-**Confusion Matrix**
-
-![ResNet50 Confusion Matrix](outputs/resnet50_loss_curve.png)
-
-Near-perfect diagonal across all 69 classes. The few misclassifications cluster around visually similar breeds — Golden Retrievers vs. Labradors, similar Terrier varieties.
-
-### MobileNetV2 — Google Colab T4 GPU
-
-| Metric | Score |
-|--------|-------|
-| Accuracy | 95.75% |
-| Precision | 96.19% |
-| Recall | 95.75% |
-| F1 Score | 95.68% |
-
-Lightweight architecture (~3.5M params vs ResNet50's ~25M). Uses depthwise-separable convolutions — faster to train and more efficient for deployment without a GPU. Despite fewer parameters, performance trails ResNet50 by ~1.8% across all metrics.
+We built a tool that gives shelter staff an automated first pass from a single photo, with a confidence score and two alternative predictions so workers can make informed decisions rather than guesses. The long-term goal is a containerized tool shelters can self-host that feeds predictions directly into their intake database.
 
 ---
 
 ## Dataset
 
-[70 Dog Breeds Image Dataset](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set) — Kaggle
+**Source:** [70 Dog Breeds Image Dataset](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set) — Kaggle (gpiosenka)
 
-69 breeds, ~8,692 images, pre-split into train / valid / test. Images resized to 224×224. We used the dataset's built-in 70/15/15 split rather than the common 80/20 default, giving the model more meaningful validation signal across rare breeds.
+- **Size:** 8,692 images across 69 breeds
+- **Class balance:** Some breeds have significantly fewer images than others — addressed with `WeightedRandomSampler` during training
+- **Split:** 70% train / 15% validation / 15% test
 
-![Breed Distribution Dashboard](outputs/tableau_breed_distribution.png)
+The 70/15/15 split is the course standard rather than the common 80/20 pattern. We chose this deliberately — a larger validation and test set gives more reliable signal across rare breeds with fewer than 100 images, where an 80/20 split would leave too few samples to catch overfitting.
 
-## Database Schema
+---
 
-![ERD](docs/Sprint%202%20ERD%20-%20Pluto's%20Repawsitory.png)
+## Pipeline Overview
+
+```
+Raw Images → SQLite Database → Preprocessing → Training → FastAPI App
+```
+
+**1. EDA** — Explored class distribution, image dimensions, and class imbalance across all 69 breeds. Identified outliers, corrupt files, and label inconsistencies before any data touched the model.
+
+**2. SQL Database** — Built a SQLite metadata store (`sprint2_database.py`) tracking file path, breed label, train/valid/test split, image dimensions, and quality flags for all 8,692 images. Queried throughout the pipeline to ensure clean, consistent data access.
+
+**3. Preprocessing** — Custom PyTorch `Dataset` class. All images resized to **224×224** and normalized using ImageNet statistics (`mean=[0.485, 0.456, 0.406]`, `std=[0.229, 0.224, 0.225]`). Augmentation applied to the training set only: random horizontal flip, ±15° rotation, color jitter. `WeightedRandomSampler` ensures underrepresented breeds receive proportional training exposure.
+
+**4. Training** — Pretrained MobileNetV2 and ResNet50 from `torchvision`. Base layers frozen in Phase 1 (15 epochs), then unfrozen for full fine-tuning in Phase 2 (15 more epochs). Classification heads replaced with `Linear(1280, 69)` and `Linear(2048, 69)`. Optimizer: Adam. Loss: CrossEntropyLoss.
+
+**5. Deployment** — The trained MobileNetV2 exports to a 9.1 MB `.pt` file. A FastAPI server loads it at startup and runs inference on every `/predict` request.
+
+**Deployment contract:** The inference endpoint applies the same 224×224 resize and the same ImageNet normalization used during training — the model never sees a pixel distribution at inference that it was not trained on. This is enforced in `app.py` rather than left to the client.
+
+---
+
+## Results
+
+We evaluated both models on 682 held-out test images across all 69 breeds.
+
+| Model | Accuracy | Precision | Recall | F1 Score | Params | Hardware |
+|-------|----------|-----------|--------|----------|--------|----------|
+| **MobileNetV2** *(deployed)* | **95.75%** | 96.19% | 95.75% | 95.68% | ~3.5M | Colab T4 GPU |
+| ResNet50 | 97.51% | 97.70% | 97.51% | 97.52% | ~25M | Colab T4 GPU |
+
+**Training vs. Validation Loss — Both Models (30 Epochs, 2-Phase)**
+
+![Loss Curves](outputs/ozor_loss_curves.png)
+
+Both models use the two-phase training strategy. The dashed line marks the Phase 2 unfreeze. ResNet50 converges faster and reaches lower loss overall. MobileNetV2 stays tighter across Phase 2 with less divergence between train and validation loss.
+
+**Where the model struggles:** The most common misclassifications occur between visually similar breeds — Golden Retrievers and Labrador Retrievers, and between similar Terrier varieties. The model also assumes a single purebred dog in frame; mixed-breed photos or partial shots (face only, blurry background dog) return lower confidence scores and less reliable predictions. These cases show up correctly as lower confidence in the "Also Considered" results rather than a wrong confident answer.
+
+---
+
+## Tech Stack
+
+| Layer | Tools |
+|-------|-------|
+| Modeling | PyTorch 2.2 · MobileNetV2 · ResNet50 · CrossEntropyLoss · Adam |
+| Data | SQLite · Pandas · Kaggle API |
+| Backend | FastAPI 0.111 · Uvicorn · Python 3.10 |
+| Frontend | Vanilla JavaScript · CSS3 · Dog CEO API |
+| Deployment | Docker · Render.com |
+| Training Environment | Google Colab · T4 GPU · Jupyter |
+| Visualization | Matplotlib · Seaborn |
 
 ---
 
 ## Repo Structure
 
 ```
-plutos-repawsitory/
-├── app/                          # FastAPI backend + frontend (deploy this to HF Spaces)
-│   ├── app.py                    # API: /predict endpoint, model loading
-│   ├── Dockerfile                # HF Spaces deployment
+dog-breed-classification/
+├── app/
+│   ├── app.py                    # FastAPI backend — /predict endpoint + model loading
+│   ├── Dockerfile                # Render.com deployment
 │   ├── requirements.txt
 │   ├── models/
-│   │   └── mobilenet_v2_dogbreed_regularized.pt
+│   │   └── mobilenet_v2_dogbreed_regularized.pt   # 9.1 MB trained model
 │   └── static/
-│       └── index.html            # Frontend: scan + breed library
-├── src/                          # React/Vite version (Lovable-ready)
-├── notebooks/
-│   ├── 01_eda.ipynb
-│   └── 02_preprocessing.ipynb
-├── outputs/                      # Loss curves, confusion matrices
-├── docs/                         # ERD and diagrams
+│       └── index.html            # Frontend: scan view + breed library
+├── src/                          # React/Vite version of the frontend
+│   ├── App.jsx
+│   ├── breeds.js
+│   └── main.jsx
+├── notebooks/                    # Team Jupyter notebooks — EDA, preprocessing, training
+├── outputs/
+│   └── ozor_loss_curves.png      # Training vs. validation loss — both models
 ├── sprint2_database.py           # SQLite metadata pipeline
-├── dogs_updated.csv
+├── dogs_updated.csv              # Cleaned breed labels
+├── package.json                  # React/Vite dependencies
 └── README.md
 ```
 
@@ -124,28 +141,21 @@ plutos-repawsitory/
 
 ```bash
 git clone https://github.com/drehandley/dog-breed-classification.git
-cd dog-breed-classification
-pip install torch torchvision pandas scikit-learn matplotlib seaborn
+cd dog-breed-classification/app
 
-# Download dataset
-kaggle datasets download -d gpiosenka/70-dog-breedsimage-data-set --unzip -p data/
-
-# Run notebooks in order
-# 01_eda → 02_preprocessing → 03_model_training
+pip install -r requirements.txt
+uvicorn app:app --reload --port 8000
+# Open http://localhost:8000
 ```
 
-For ResNet50: open `03_model_training_resnet50.ipynb` in Google Colab, set runtime to T4 GPU.
+No frontend build step required — FastAPI serves the HTML and static files directly from one process.
 
----
+To retrain the model, download the dataset first:
 
-## Sprint Plan
-
-| Sprint | Dates | Focus | Status |
-|--------|-------|-------|--------|
-| 1 | 6/3 – 6/11 | Project setup, EDA | Done |
-| 2 | 6/11 – 6/25 | SQL database, preprocessing | Done |
-| 3 | 6/25 – 7/9 | Model training and evaluation | Done |
-| 4 | 7/9 – 7/16 | Demo app, presentation | Done |
+```bash
+kaggle datasets download -d gpiosenka/70-dog-breedsimage-data-set --unzip -p data/
+# Then run the notebooks in order: EDA → preprocessing → training
+```
 
 ---
 
@@ -153,26 +163,38 @@ For ResNet50: open `03_model_training_resnet50.ipynb` in Google Colab, set runti
 
 | Name | Role |
 |------|------|
-| Dre (Lead) | Architecture, SQL database, notebook structure |
-| Cameron | Data cleaning, label fixes, training loop |
-| Manuela | Preprocessing pipeline, augmentation, evaluation |
-| Ozor | Class imbalance, WeightedRandomSampler, loss curves |
+| **Dre Handley** *(Lead)* | Project architecture, SQL database, deployment, app frontend |
+| **Cameron Bridgwater** | Data cleaning, label normalization, training loop |
+| **Manuela Chalen** | Preprocessing pipeline, augmentation strategy, model evaluation |
+| **Ozor Moya** | Class imbalance analysis, WeightedRandomSampler, loss curve visualization |
 
 ---
 
 ## Challenges
 
-- **Class imbalance** — some breeds had significantly fewer images. Solved with WeightedRandomSampler so underrepresented breeds weren't ignored during training.
-- **CPU training limits** — MobileNetV2 was chosen for its smaller footprint on local CPU. ResNet50 moved to Google Colab with a T4 GPU.
-- **Label bugs** — whitespace inconsistencies in the original CSV caused silent label mismatches. Fixed before any preprocessing ran.
+**Class imbalance** — Breed representation in the dataset is uneven. Without intervention, the training loop would see popular breeds far more often than rare ones. `WeightedRandomSampler` recalculates sampling probability per class so every breed gets proportional exposure during training.
 
-## What's Next
+**Deployment constraints** — ResNet50 at ~25M parameters is too slow to serve on a free CPU cloud tier within a usable response time. MobileNetV2 uses depthwise-separable convolutions to achieve 7x fewer parameters with only a ~1.8% accuracy trade-off, making real-time CPU inference possible.
 
-- Fine-tune deeper ResNet50 layers for additional accuracy gains
-- Expand to mixed-breed identification
-- Deploy to animal shelters as a free intake tool
+**Label bugs** — Whitespace inconsistencies in the source CSV caused silent mismatches between image file paths and their assigned class labels. These were caught during EDA before any preprocessing ran. A single mislabeled sample at this stage would corrupt the model's understanding of that class.
 
 ---
 
-*The Knowledge House — Data Science Fellowship, Phase 3*
-*Dataset: [gpiosenka on Kaggle](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set)*
+## What's Next
+
+- Unfreeze deeper ResNet50 layers with a longer training schedule — 97.51% still has room
+- Multi-label classification head for mixed-breed identification
+- CSV export so predictions feed directly into shelter intake databases
+- Expand from 69 breeds to 120 using the Stanford Dogs Dataset
+
+---
+
+## Acknowledgments
+
+- Dataset: [gpiosenka on Kaggle](https://www.kaggle.com/datasets/gpiosenka/70-dog-breedsimage-data-set)
+- Dog photos in the breed library: [Dog CEO API](https://dog.ceo/)
+- The Knowledge House Data Science Fellowship, Phase 3
+
+---
+
+*The Knowledge House — Data Science Fellowship, Phase 3 · Group 2*

@@ -62,9 +62,8 @@ The 70/15/15 split is the course standard rather than the common 80/20 pattern. 
 
 ## Pipeline Overview
 
-```
-Raw Images → SQLite Database → Preprocessing → Training → FastAPI App
-```
+![Pipeline Diagram](outputs/pipeline_diagram.png)
+
 
 **1. EDA** — Explored class distribution, image dimensions, and class imbalance across all 69 breeds. Identified outliers, corrupt files, and label inconsistencies before any data touched the model.
 

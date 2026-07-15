@@ -8,6 +8,7 @@ Built as a capstone project for The Knowledge House Data Science Fellowship, Pha
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://dog-breed-classification-wtir.onrender.com)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
 
 ---
 
@@ -26,6 +27,8 @@ Upload any dog photo → the model returns the top 3 predicted breeds with confi
 - [Problem Statement](#problem-statement)
 - [Dataset](#dataset)
 - [Pipeline Overview](#pipeline-overview)
+- [Database Schema (ERD)](#database-schema-erd)
+- [EDA Dashboard](#eda-dashboard)
 - [Results](#results)
 - [Tech Stack](#tech-stack)
 - [Repo Structure](#repo-structure)
@@ -77,6 +80,22 @@ Raw Images → SQLite Database → Preprocessing → Training → FastAPI App
 
 ---
 
+## Database Schema (ERD)
+
+We built a SQLite metadata database in Sprint 2 to track every image in the pipeline — file path, breed label, train/valid/test split assignment, image dimensions, and a quality flag. The ERD below shows the schema.
+
+![ERD Diagram](outputs/erd_diagram.png)
+
+---
+
+## EDA Dashboard
+
+Class distribution, image counts per breed, and split coverage visualized in Tableau.
+
+![Tableau Dashboard](outputs/tableau_dashboard.png)
+
+---
+
 ## Results
 
 We evaluated both models on 682 held-out test images across all 69 breeds.
@@ -105,8 +124,9 @@ Both models use the two-phase training strategy. The dashed line marks the Phase
 | Backend | FastAPI 0.111 · Uvicorn · Python 3.10 |
 | Frontend | Vanilla JavaScript · CSS3 · Dog CEO API |
 | Deployment | Docker · Render.com |
-| Training Environment | Google Colab · T4 GPU · Jupyter |
-| Visualization | Matplotlib · Seaborn |
+| Training Environment | [Google Colab](https://colab.research.google.com/) · T4 GPU · Jupyter Notebooks |
+| Data Visualization | Tableau · Matplotlib · Seaborn |
+| Database | SQLite |
 
 ---
 

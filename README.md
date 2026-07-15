@@ -31,6 +31,8 @@ The inference pipeline applies the same resize (224×224) and normalization (mea
 
 ## Demo
 
+**Live:** https://dog-breed-classification-wtir.onrender.com
+
 Upload any dog photo → the model returns the top 3 predicted breeds with confidence scores. The interface includes a breed library of all 69 classes with real photos, stat breakdowns, and group filters.
 
 **Run locally:**
@@ -121,7 +123,7 @@ plutos-repawsitory/
 ## Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/dog-breed-classification.git
+git clone https://github.com/drehandley/dog-breed-classification.git
 cd dog-breed-classification
 pip install torch torchvision pandas scikit-learn matplotlib seaborn
 
@@ -142,7 +144,7 @@ For ResNet50: open `03_model_training_resnet50.ipynb` in Google Colab, set runti
 |--------|-------|-------|--------|
 | 1 | 6/3 – 6/11 | Project setup, EDA | Done |
 | 2 | 6/11 – 6/25 | SQL database, preprocessing | Done |
-| 3 | 6/25 – 7/9 | Model training and evaluation | In progress |
+| 3 | 6/25 – 7/9 | Model training and evaluation | Done |
 | 4 | 7/9 – 7/16 | Demo app, presentation | Done |
 
 ---
